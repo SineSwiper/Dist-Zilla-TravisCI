@@ -11,7 +11,10 @@ use ExtUtils::MakeMaker 6.30;
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Travis CI plugins for your DZIL-based distribution",
   "AUTHOR" => "Brendan Byrd <BBYRD\@CPAN.org>",
-  "BUILD_REQUIRES" => {},
+  "BUILD_REQUIRES" => {
+    "Test::CheckDeps" => "0.002",
+    "Test::UseAllModules" => "0.10"
+  },
   "CONFIGURE_REQUIRES" => {},
   "DISTNAME" => "Dist-Zilla-TravisCI",
   "EXE_FILES" => [],

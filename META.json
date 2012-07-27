@@ -43,6 +43,12 @@
             "perl" : "v5.10.1",
             "sanity" : "0.91"
          }
+      },
+      "test" : {
+         "requires" : {
+            "Test::CheckDeps" : "0.002",
+            "Test::UseAllModules" : "0.10"
+         }
       }
    },
    "provides" : {
@@ -180,9 +186,39 @@
             "version" : "0.07"
          },
          {
+            "class" : "Dist::Zilla::Plugin::Test::CPAN::Meta::JSON",
+            "name" : "Test::CPAN::Meta::JSON",
+            "version" : "0.003"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::CheckDeps",
+            "name" : "Test::CheckDeps",
+            "version" : "0.005"
+         },
+         {
             "class" : "Dist::Zilla::Plugin::Test::Portability",
             "name" : "Test::Portability",
             "version" : "2.000003"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::Pod::LinkCheck",
+            "name" : "Test::Pod::LinkCheck",
+            "version" : "1.001"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::Pod::No404s",
+            "name" : "Test::Pod::No404s",
+            "version" : "1.001"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::Synopsis",
+            "name" : "Test::Synopsis",
+            "version" : "2.000002"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::MinimumVersion",
+            "name" : "Test::MinimumVersion",
+            "version" : "2.000002"
          },
          {
             "class" : "Dist::Zilla::Plugin::ReportVersions::Tiny",
@@ -193,6 +229,21 @@
             "class" : "Dist::Zilla::Plugin::Test::CheckManifest",
             "name" : "Test::CheckManifest",
             "version" : "0.03"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::DistManifest",
+            "name" : "Test::DistManifest",
+            "version" : "2.000002"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::UseAllModules",
+            "name" : "Test::UseAllModules",
+            "version" : "0.002"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::Version",
+            "name" : "Test::Version",
+            "version" : "0.002004"
          },
          {
             "class" : "Dist::Zilla::Plugin::AutoPrereqs",

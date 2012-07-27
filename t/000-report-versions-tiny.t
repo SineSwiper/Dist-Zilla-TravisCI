@@ -65,6 +65,8 @@ eval { $v .= pmver('Moose','0.34') };
 eval { $v .= pmver('Moose::Autobox','0.09') };
 eval { $v .= pmver('MooseX::Has::Sugar','0.0100') };
 eval { $v .= pmver('MooseX::Types::Moose','any version') };
+eval { $v .= pmver('Test::CheckDeps','0.002') };
+eval { $v .= pmver('Test::UseAllModules','0.10') };
 eval { $v .= pmver('sanity','0.91') };
 
 
