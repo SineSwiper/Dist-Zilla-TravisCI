@@ -1,8 +1,9 @@
+# PODNAME: Dist::Zilla::TravisCI
 # ABSTRACT: Travis CI plugins for your DZIL-based distribution
 
 =begin wikidoc
 
-=head1 SYNOPSIS
+= SYNOPSIS
  
    [@Prereqs]
    [TravisYML]
@@ -87,3 +88,5 @@ to make it what it is.
 in CPAN in order for Travis to download it.  Hopefully, I can get this finished soon now...
 * *Tests* - This has actually been well-tested via other modules, but I still need to add in a test
 platform here.  Kinda sad, actually...
+
+=end wikidoc

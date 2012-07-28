@@ -141,7 +141,7 @@ sub build_travis_yml {
       ) );
    }
    elsif (my $bbranch = $self->build_branch) {
-      my $install = @releases ? join"\n",
+      my $install = @releases ? join ("\n",
          'install:',
          '   # Install the lowest possible required version for the dependencies',
          '   - export OLD_CPANM_OPT=$PERL_CPANM_OPT',

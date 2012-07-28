@@ -1,0 +1,15 @@
+language: perl
+perl:
+   - "5.16"
+   - "5.14"
+   - "5.12"
+   - "5.10"
+
+install:
+   # Deal with all of the DZIL dependancies, quickly and quietly
+   - cpanm --quiet --notest Dist::Zilla
+   - dzil authordeps | cpanm --quiet --notest
+
+   - dzil listdeps | cpanm --verbose
+script:
+   - dzil smoke --release --author
