@@ -173,7 +173,7 @@ You can connect to the server at 'irc.perl.org' and join this channel: #distzill
 
 =head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests via L<L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues>|GitHub>.
+Please report any bugs or feature requests via L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues>.
 
 =head1 AUTHOR
 

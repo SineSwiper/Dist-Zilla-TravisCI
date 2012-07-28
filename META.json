@@ -201,11 +201,6 @@
             "version" : "2.000003"
          },
          {
-            "class" : "Dist::Zilla::Plugin::Test::Pod::LinkCheck",
-            "name" : "Test::Pod::LinkCheck",
-            "version" : "1.001"
-         },
-         {
             "class" : "Dist::Zilla::Plugin::Test::Pod::No404s",
             "name" : "Test::Pod::No404s",
             "version" : "1.001"
