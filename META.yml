@@ -168,10 +168,6 @@ x_Dist_Zilla:
       name: Test::Pod::No404s
       version: 1.001
     -
-      class: Dist::Zilla::Plugin::Test::Synopsis
-      name: Test::Synopsis
-      version: 2.000002
-    -
       class: Dist::Zilla::Plugin::Test::MinimumVersion
       name: Test::MinimumVersion
       version: 2.000002
