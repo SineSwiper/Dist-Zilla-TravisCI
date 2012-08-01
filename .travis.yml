@@ -7,9 +7,9 @@ perl:
 
 install:
    # Deal with all of the DZIL dependancies, quickly and quietly
-   - cpanm --quiet --notest Dist::Zilla
-   - dzil authordeps | cpanm --quiet --notest
+   - cpanm --quiet --notest --skip-satisfied Dist::Zilla
+   - dzil authordeps | grep -vP '[^\w:]' | cpanm --quiet --notest --skip-satisfied
 
-   - dzil listdeps | cpanm --verbose
+   - dzil listdeps | grep -vP '[^\w:]' | cpanm --verbose
 script:
    - dzil smoke --release --author

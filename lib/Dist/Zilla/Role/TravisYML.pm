@@ -123,7 +123,7 @@ sub build_travis_yml {
          (map { '   - cpanm --verbose '.$_ } @releases),
          '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       ) :
-         '   - dzil listdeps | cpanm --verbose'
+         "   - dzil listdeps | grep -vP '[^\\w:]' | cpanm --verbose"
       ;
 
       File::Slurp::write_file( '.travis.yml', join("\n",
@@ -132,7 +132,7 @@ sub build_travis_yml {
             install:
                # Deal with all of the DZIL dependancies, quickly and quietly
                - cpanm --quiet --notest --skip-satisfied Dist::Zilla
-               - dzil authordeps | cpanm --quiet --notest --skip-satisfied
+               - dzil authordeps | grep -vP '[^\\w:]' | cpanm --quiet --notest --skip-satisfied
          "),
          $install,
          'script:',
