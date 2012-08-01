@@ -293,7 +293,7 @@
          {
             "class" : "Dist::Zilla::Plugin::TravisYML",
             "name" : "TravisYML",
-            "version" : null
+            "version" : "0.91"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch",

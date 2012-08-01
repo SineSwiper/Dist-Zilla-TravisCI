@@ -234,7 +234,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::TravisYML
       name: TravisYML
-      version: ~
+      version: 0.91
     -
       class: Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch
       name: Git::CheckFor::CorrectBranch
