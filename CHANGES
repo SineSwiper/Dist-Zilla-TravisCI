@@ -1,6 +1,16 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v0.91 2012-08-01
+----------------
+
+commit 72b8f50aae1b1a616f697710a54351d04820d419
+Author: SineSwiper <BBYRD@CPAN.org>
+Date:   Wed Aug 1 09:20:41 2012 -0400
+
+    Remove non-module lines from "| cpanm" commands (like
+       ReportPhases' "Current Command")
+
 ===================================
 End of changes in the last 365 days
 ===================================
