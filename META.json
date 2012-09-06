@@ -55,19 +55,19 @@
    "provides" : {
       "Dist::Zilla::App::Command::chainsmoke" : {
          "file" : "lib/Dist/Zilla/App/Command/chainsmoke.pm",
-         "version" : "0.92"
+         "version" : "0.93"
       },
       "Dist::Zilla::App::CommandHelper::ChainSmoking" : {
          "file" : "lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm",
-         "version" : "0.92"
+         "version" : "0.93"
       },
       "Dist::Zilla::Plugin::TravisYML" : {
          "file" : "lib/Dist/Zilla/Plugin/TravisYML.pm",
-         "version" : "0.92"
+         "version" : "0.93"
       },
       "Dist::Zilla::Role::TravisYML" : {
          "file" : "lib/Dist/Zilla/Role/TravisYML.pm",
-         "version" : "0.92"
+         "version" : "0.93"
       }
    },
    "release_status" : "stable",
@@ -83,7 +83,7 @@
       },
       "x_irc" : "irc://irc.perl.org/#distzilla"
    },
-   "version" : "0.92",
+   "version" : "0.93",
    "x_Dist_Zilla" : {
       "plugins" : [
          {
@@ -267,11 +267,6 @@
             "version" : "4.300020"
          },
          {
-            "class" : "Dist::Zilla::Plugin::MetaYAML",
-            "name" : "MetaYAML",
-            "version" : "4.300020"
-         },
-         {
             "class" : "Dist::Zilla::Plugin::MetaNoIndex",
             "name" : "MetaNoIndex",
             "version" : "4.300020"
@@ -294,7 +289,7 @@
          {
             "class" : "Dist::Zilla::Plugin::TravisYML",
             "name" : "TravisYML",
-            "version" : "0.91"
+            "version" : "0.92"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch",

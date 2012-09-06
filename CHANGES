@@ -4,6 +4,12 @@ Revision History for Dist-Zilla-TravisCI
 v0.92 2012-09-06
 ----------------
 
+commit 68431c9f2ed2ef9ab6a264e48df0f9cc7b56db91
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Thu Sep 6 12:20:49 2012 -0400
+
+    Release v0.92
+
 commit c892b0ca9d47d14b24b0c85f2c517675f9619434
 Author: Brendan Byrd <Perl@ResonatorSoft.org>
 Date:   Thu Sep 6 12:14:54 2012 -0400
