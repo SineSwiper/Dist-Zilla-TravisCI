@@ -58,6 +58,7 @@ eval { $v .= pmver('Dist::Zilla::Role::Git::Remote','v0.1.1') };
 eval { $v .= pmver('Dist::Zilla::Role::Git::Remote::Branch','v0.1.1') };
 eval { $v .= pmver('Dist::Zilla::Role::Git::Remote::Check','v0.1.1') };
 eval { $v .= pmver('Dist::Zilla::Role::Git::Remote::Update','v0.1.1') };
+eval { $v .= pmver('Dist::Zilla::Role::Git::Repo','1.113220') };
 eval { $v .= pmver('Dist::Zilla::Role::MetaCPANInterfacer','0.90') };
 eval { $v .= pmver('File::Slurp','9999.14') };
 eval { $v .= pmver('List::AllUtils','0.01') };

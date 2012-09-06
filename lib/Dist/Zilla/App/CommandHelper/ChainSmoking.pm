@@ -31,6 +31,7 @@ has branch => ( isa => 'Str', is => 'ro', lazy => 1, default => sub {
 ### HACK: Needed for DirtyFiles, though this is really only used for Plugins ###
 sub mvp_multivalue_args { }
 
+with 'Dist::Zilla::Role::Git::Repo';
 with 'Dist::Zilla::Role::Git::DirtyFiles';
 sub _build_allow_dirty { [ ] }  # overload
 
