@@ -4,6 +4,12 @@ Revision History for Dist-Zilla-TravisCI
 v0.91 2012-08-01
 ----------------
 
+commit 8e13056e77260f5c2ef50e65face2a61e70feed0
+Author: SineSwiper <BBYRD@CPAN.org>
+Date:   Wed Aug 1 11:08:51 2012 -0400
+
+    Release v0.91
+
 commit 55c533af17d08c0aba78f092b368c9341bdd8052
 Author: SineSwiper <BBYRD@CPAN.org>
 Date:   Wed Aug 1 09:20:41 2012 -0400
