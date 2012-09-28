@@ -4,6 +4,18 @@ Revision History for Dist-Zilla-TravisCI
 v0.93 2012-09-28
 ----------------
 
+commit 652e741523b8016558432b2f2dba89974fae5c18
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Sep 28 15:54:26 2012 -0400
+
+    Chain smoking for local branch master
+
+commit ae28e1ed3437da7842896e4d4f234588dc2be923
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Sep 28 15:53:44 2012 -0400
+
+    Bug fixes
+
 commit 4bfa28e4a02ea7e034bff4a46e95be161141283d
 Author: Brendan Byrd <Perl@ResonatorSoft.org>
 Date:   Fri Sep 28 15:41:27 2012 -0400
