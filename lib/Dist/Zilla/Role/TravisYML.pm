@@ -142,7 +142,7 @@ sub build_travis_yml {
             install:
                # Deal with all of the DZIL dependancies, quickly and quietly
                - cpanm --quiet --notest --skip-satisfied Dist::Zilla
-               - dzil authordeps | grep -vP '[^\\w:]' | cpanm --quiet --notest --skip-satisfied
+               - dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied
          "),
          $install,
          'script:',
