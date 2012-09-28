@@ -124,17 +124,17 @@ sub build_travis_yml {
 
    my $env_vars = '   - export RELEASE_TESTING=1 AUTOMATED_TESTING=1 AUTHOR_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
    unless ($is_build_branch) {
-      my $install = @releases ? join("\n", 
+      my $install = join ("\n", scalar(@releases) ? (
          '   # Install the lowest possible required version for the dependencies',
          $env_vars,
          '   - export OLD_CPANM_OPT=$PERL_CPANM_OPT',
          "   - export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN '\$PERL_CPANM_OPT",
          (map { '   - cpanm --verbose '.$_ } @releases),
          '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
-      ) :
+      ) : (
          $env_vars,
          "   - dzil listdeps | grep -vP '[^\\w:]' | cpanm --verbose"
-      ;
+      ) );
 
       File::Slurp::write_file( '.travis.yml', join("\n",
          $header,
@@ -151,7 +151,7 @@ sub build_travis_yml {
       ) );
    }
    elsif (my $bbranch = $self->build_branch) {
-      my $install = @releases ? join ("\n",
+      my $install = join ("\n", scalar(@releases) ? (
          'install:',
          '   # Install the lowest possible required version for the dependencies',
          $env_vars,
@@ -159,10 +159,10 @@ sub build_travis_yml {
          "   - export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN '\$PERL_CPANM_OPT",
          (map { '   - cpanm --verbose '.$_ } @releases),
          '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
-      ) :
+      ) : (
          'install:',
          $env_vars,
-      ;
+      ) );
 
       File::Slurp::write_file(
          Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify,
