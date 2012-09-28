@@ -1,6 +1,25 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v0.93 2012-09-28
+----------------
+
+commit 4bfa28e4a02ea7e034bff4a46e95be161141283d
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Sep 28 15:41:27 2012 -0400
+
+    Superfast parallelized dependancy installs for "dzil authordeps"
+
+commit 713e33500d663b6cad0943f7e3956df2f448868b
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Sep 28 15:30:39 2012 -0400
+
+    Minor fixes
+    
+    Improve IRC section
+    Add exports for TESTING/HARNESS vars
+    Remove YAML v2 for META, as YAML was removed in v2
+
 v0.92 2012-09-06
 ----------------
 

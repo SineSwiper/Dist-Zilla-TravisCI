@@ -61,8 +61,15 @@ has _footer => ( ro, isa => Str, lazy, default => sub {
       $footer .= $email == 0 ? "   email: false\n" :
                  $email == 1 ? "" :
                                "   email:\n".join("\n", map { '      - "'.$_.'"'; } grep { $_ } @{$self->notify_email})."\n";
-
-      $footer .=               "   irc:\n"  .join("\n", map { '      - "'.$_.'"'; } grep { $_ } @{$self->notify_irc  })."\n" if $irc;
+      $footer .= "   irc:\n".
+                 "      channels:\n".
+                 join("\n", map { '         - "'.$_.'"'; } grep { $_ } @{$self->notify_irc })."\n".
+                 "      template:\n".
+                 '         - "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})'."\n".
+                 "      on_success: change\n".
+                 "      on_failure: always\n".
+                 "      use_notice: true\n"
+         if ($irc);
    }
    
    return $footer;
@@ -114,15 +121,18 @@ sub build_travis_yml {
    my $header   = $self->_header;
    my $footer   = $self->_footer;
    my @releases = @{$self->_releases};
-      
+
+   my $env_vars = '   - export RELEASE_TESTING=1 AUTOMATED_TESTING=1 AUTHOR_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
    unless ($is_build_branch) {
       my $install = @releases ? join("\n", 
          '   # Install the lowest possible required version for the dependencies',
+         $env_vars,
          '   - export OLD_CPANM_OPT=$PERL_CPANM_OPT',
          "   - export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN '\$PERL_CPANM_OPT",
          (map { '   - cpanm --verbose '.$_ } @releases),
          '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       ) :
+         $env_vars,
          "   - dzil listdeps | grep -vP '[^\\w:]' | cpanm --verbose"
       ;
 
@@ -132,7 +142,7 @@ sub build_travis_yml {
             install:
                # Deal with all of the DZIL dependancies, quickly and quietly
                - cpanm --quiet --notest --skip-satisfied Dist::Zilla
-               - dzil authordeps | grep -vP '[^\\w:]' | cpanm --quiet --notest --skip-satisfied
+               - dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied
          "),
          $install,
          'script:',
@@ -144,12 +154,14 @@ sub build_travis_yml {
       my $install = @releases ? join ("\n",
          'install:',
          '   # Install the lowest possible required version for the dependencies',
+         $env_vars,
          '   - export OLD_CPANM_OPT=$PERL_CPANM_OPT',
          "   - export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN '\$PERL_CPANM_OPT",
          (map { '   - cpanm --verbose '.$_ } @releases),
          '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       ) :
-         '# Travis-CI defaults should be enough'
+         'install:',
+         $env_vars,
       ;
 
       File::Slurp::write_file(
