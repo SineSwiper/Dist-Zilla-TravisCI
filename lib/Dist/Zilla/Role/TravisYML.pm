@@ -134,7 +134,7 @@ sub build_travis_yml {
       ) : (
          $env_vars,
          "   - dzil listdeps | grep -vP '[^\\w:]' | cpanm --verbose"
-      );
+      ) );
 
       File::Slurp::write_file( '.travis.yml', join("\n",
          $header,
@@ -162,7 +162,7 @@ sub build_travis_yml {
       ) : (
          'install:',
          $env_vars,
-      );
+      ) );
 
       File::Slurp::write_file(
          Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify,
