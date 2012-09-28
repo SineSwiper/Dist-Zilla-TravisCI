@@ -162,6 +162,7 @@ sub build_travis_yml {
       ) : (
          'install:',
          $env_vars,
+         '   - cpanm --installdeps --notest --skip-satisfied .',
       ) );
 
       File::Slurp::write_file(
