@@ -1,6 +1,15 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v0.94 2012-09-28
+----------------
+
+commit b12374beccea16d768e62fe62e34cb56103d730a
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Sep 28 16:16:20 2012 -0400
+
+    Fix build branch to include 'installdeps' command
+
 v0.93 2012-09-28
 ----------------
 
