@@ -1,6 +1,15 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v0.95 2012-10-02
+----------------
+
+commit 9df92c01a919e5536360cbaf600795bd26b15bac
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Tue Oct 2 15:46:10 2012 -0400
+
+    Fix typo on IRC block in YML
+
 v0.94 2012-09-28
 ----------------
 
