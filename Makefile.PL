@@ -40,7 +40,7 @@ my %WriteMakefileArgs = (
     "MooseX::Types::Moose" => 0,
     "sanity" => "0.91"
   },
-  "VERSION" => "0.94",
+  "VERSION" => "0.95",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -1,6 +1,6 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '0.94'; # VERSION
+our $VERSION = '0.95'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
 use sanity;
@@ -65,7 +65,7 @@ has _footer => ( ro, isa => Str, lazy, default => sub {
                  "      channels:\n".
                  join("\n", map { '         - "'.$_.'"'; } grep { $_ } @{$self->notify_irc })."\n".
                  "      template:\n".
-                 '         - "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})'."\n".
+                 '         - "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})"'."\n".
                  "      on_success: change\n".
                  "      on_failure: always\n".
                  "      use_notice: true\n"
