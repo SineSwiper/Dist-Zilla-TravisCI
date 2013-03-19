@@ -43,17 +43,17 @@ has _header => ( ro, isa => Str, lazy, default => sub {
 });
 has _footer => ( ro, isa => Str, lazy, default => sub {
    my $self = shift;
-   
+
    my $email = $self->notify_email->[0];
    my $irc   = $self->notify_irc->[0];
    my $zilla = $self->zilla;
    my $rmeta = $self->zilla->distmeta->{resources};
-   
+
    no warnings 'numeric';  # *grumble*
-   
+
    $irc == 1 and $irc = $self->notify_irc->[0] = $rmeta->{ first { /irc$/i } keys %$rmeta } || 0;
    s#^irc:|/+##gi for @{$self->notify_irc};
-   
+
    my $footer = '';
    # Travis-CI default is to set email, but not use IRC
    unless ($email == 1 && !$irc) {
@@ -71,7 +71,7 @@ has _footer => ( ro, isa => Str, lazy, default => sub {
                  "      use_notice: true\n"
          if ($irc);
    }
-   
+
    return $footer;
 });
 
@@ -83,7 +83,7 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    if ($self->mvdt) {
       my $prereqs = $self->zilla->prereqs;
       $self->log("Searching for minimum dependency versions");
-      
+
       my $minperl = version->parse(
          $prereqs->requirements_for('runtime', 'requires')->requirements_for_module('perl') ||
          v5.8.8  # released in 2006... C'mon, people!  Don't make me lower this!
@@ -91,7 +91,7 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
       foreach my $phase (qw(runtime configure build test)) {
          $self->logger->set_prefix("{Phase '$phase'} ");
          my $req = $prereqs->requirements_for($phase, 'requires');
-         
+
          foreach my $module ( sort ($req->required_modules) ) {
             next if $module eq 'perl';  # obvious
 
@@ -99,25 +99,25 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
             my ($release, $minver) = $self->_mcpan_module_minrelease($module, $modver);
             next unless $release;
             my $mod_in_perlver = Module::CoreList->first_release($module, $minver);
-            
+
             if ($mod_in_perlver && $minperl >= $mod_in_perlver) {
                $self->log_debug(['Module %s v%s is already found in core Perl v%s (<= v%s)', $module, $minver, $mod_in_perlver, $minperl]);
                next;
             }
-            
+
             $self->log_debug(['Found minimum dep version for Module %s as %s', $module, $release]);
             push @releases, $release;
          }
       }
       $self->logger->clear_prefix;
    }
-   
+
    return \@releases;
 });
 
 sub build_travis_yml {
    my ($self, $is_build_branch) = @_;
-   
+
    my $header   = $self->_header;
    my $footer   = $self->_footer;
    my @releases = @{$self->_releases};
@@ -138,6 +138,12 @@ sub build_travis_yml {
 
       File::Slurp::write_file( '.travis.yml', join("\n",
          $header,
+
+         # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
+         'before_install:',
+         '   # Prevent "Please tell me who you are" errors for certain DZIL configs',
+         '   - git config --global user.name "TravisCI"',
+
          ai("
             install:
                # Deal with all of the DZIL dependancies, quickly and quietly
@@ -188,16 +194,16 @@ sub build_travis_yml {
 
 sub _as_lucene_query {
    my ($self, $ver_str) = @_;
-   
+
    # simple versions short-circuits
    return () if $ver_str eq '0';
    return ('module.version_numified:['.version->parse($ver_str)->numify.' TO 999999]')
       unless ($ver_str =~ /[\<\=\>]/);
-   
+
    my ($min, $max, $is_min_inc, $is_max_inc, @num_conds, @str_conds);
    foreach my $ver_cmp (split(qr{\s*,\s*}, $ver_str)) {
       my ($cmp, $ver) = split(qr{(?<=[\<\=\>])\s*(?=\d)}, $ver_cmp, 2);
-      
+
       # Normalize string, but keep originals for alphas
       my $use_num = 1;
       my $orig_ver = $ver;
@@ -209,7 +215,7 @@ sub _as_lucene_query {
          $use_num = 0;
       }
       else { $ver = $num_ver; }
-      
+
       for ($cmp) {
          when ('==') { return 'module.version'.($use_num ? '_numified' : '').':'.$ver; }  # no need to look at anything else
          when ('!=') { $use_num ? push(@num_conds, '-'.$ver) : push(@str_conds, '-'.$ver); }
@@ -221,20 +227,20 @@ sub _as_lucene_query {
          default     { die 'Unable to parse complex module requirements with operator of '.$cmp.' !'; }
       }
    }
-   
+
    # Min/Max parsing
    if ($min || $max) {
       $min ||= 0;
       $max ||= 999999;
       my $rng = $min.' TO '.$max;
-      
+
       # Figure out the inclusive/exclusive status
       my $inc = $is_min_inc.$is_max_inc;  # (this is just easier to deal with as a combined form)
       unshift @num_conds, '-'.($inc eq '01' ? $min : $max)
          if ($inc =~ /0/ && $inc =~ /\d\d/);  # has mismatch of inc/exc (reverse order due to unshift)
       unshift @num_conds, '+'.($inc =~ /1/ ? '['.$rng.']' : '{'.$rng.'}');  # +[{ $min TO $max }]
    }
-   
+
    # Create the string
    my @lq;
    push @lq, 'module.version_numified:('.join(' ', @num_conds).')' if @num_conds;
@@ -244,10 +250,10 @@ sub _as_lucene_query {
 
 sub _mcpan_module_minrelease {
    my ($self, $module, $ver_str, $try_harder) = @_;
-  
+
    my @lq = $self->_as_lucene_query($ver_str);
    my $maturity_q = ($ver_str =~ /==/) ? undef : 'maturity:released';  # exact version may be a developer one
-   
+
    ### XXX: This should be replaced with a ->file() method when those
    ### two pull requests of mine are put into CPAN...
    my $q = join(' AND ', 'module.name:"'.$module.'"', $maturity_q, 'module.authorized:true', @lq);
@@ -273,7 +279,7 @@ sub _mcpan_module_minrelease {
       # (ie: we shouldn't have multiples of modules or versions, and sort should actually have a value)
       $is_bad = !$hit->{sort}[0] || ref $hit->{fields}{'module.name'} || ref $hit->{fields}{'module.version'};
    } while ($is_bad and @hits);
-   
+
    if ($is_bad) {
       if ($try_harder) {
          $self->log("??? MetaCPAN is highly confused about $module!");
@@ -282,9 +288,9 @@ sub _mcpan_module_minrelease {
       $self->log_debug("   MetaCPAN got confused; trying harder...");
       return $self->_mcpan_module_minrelease($module, $ver_str, 1)
    }
-   
+
    $hit = $hit->{fields};
-   
+
    # This will almost always be .tar.gz, but TRIAL versions might have different names, etc.
    my $fields = $self->mcpan->release(
       search => {
@@ -298,23 +304,23 @@ sub _mcpan_module_minrelease {
    my $t = $fields->{tests};
    my $ttl = sum @$t{qw(pass fail unknown na)};
    unless ($ttl) {
-      $self->log(['%s has no CPAN test results!  You should consider upgrading the minimum dep version for %s...', $hit->{release}, $module]);   
+      $self->log(['%s has no CPAN test results!  You should consider upgrading the minimum dep version for %s...', $hit->{release}, $module]);
    }
    else {
       my $per   = $t->{pass} / $ttl * 100;
       my $f_ttl = $ttl - $t->{pass};
-      
+
       if ($per < 70 || $t->{fail} > 20 || $f_ttl > 30) {
          $self->log(['CPAN Test Results for %s:', $hit->{release}]);
          $self->log(['   %7s: %4u (%3.1f)', $_, $t->{lc $_}, $t->{lc $_} / $ttl * 100]) for (qw(Pass Fail Unknown NA));
          $self->log(['You should consider upgrading the minimum dep version for %s...', $module]);
       }
    }
-   
+
    my $v = $hit->{'module.version'};
    return ($hit->{author}.'/'.$fields->{archive}, $v && version->parse($v));
 }
 
 42;
- 
+
 __END__

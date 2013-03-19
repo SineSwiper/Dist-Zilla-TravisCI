@@ -5,6 +5,9 @@ perl:
    - "5.12"
    - "5.10"
 
+before_install:
+   # Prevent "Please tell me who you are" errors for certain DZIL configs
+   - git config --global user.name "TravisCI"
 install:
    # Deal with all of the DZIL dependancies, quickly and quietly
    - cpanm --quiet --notest --skip-satisfied Dist::Zilla
