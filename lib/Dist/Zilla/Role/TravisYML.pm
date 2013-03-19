@@ -138,10 +138,12 @@ sub build_travis_yml {
 
       File::Slurp::write_file( '.travis.yml', join("\n",
          $header,
+
          # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
          'before_install:',
          '   # Prevent "Please tell me who you are" errors for certain DZIL configs',
          '   - git config --global user.name "TravisCI"',
+
          ai("
             install:
                # Deal with all of the DZIL dependancies, quickly and quietly
