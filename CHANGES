@@ -4,6 +4,12 @@ Revision History for Dist-Zilla-TravisCI
 v0.96 2013-03-19
 ----------------
 
+commit ef99496fcc3cb3771f0a1283d7f5e24cd286a803
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Tue Mar 19 12:28:49 2013 -0400
+
+    Prevent "Please tell me who you are" errors for certain DZIL configs
+
 commit cc66657081c1306f88109e74a696bb8b00feb1aa
 Author: Brendan Byrd <Perl@ResonatorSoft.org>
 Date:   Tue Oct 2 15:46:10 2012 -0400
