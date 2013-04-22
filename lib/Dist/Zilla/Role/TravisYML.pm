@@ -143,6 +143,7 @@ sub build_travis_yml {
          'before_install:',
          '   # Prevent "Please tell me who you are" errors for certain DZIL configs',
          '   - git config --global user.name "TravisCI"',
+         '   - git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
 
          ai("
             install:
