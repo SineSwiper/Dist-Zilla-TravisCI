@@ -122,7 +122,7 @@ sub build_travis_yml {
    my $footer   = $self->_footer;
    my @releases = @{$self->_releases};
 
-   my $env_vars = '   - export RELEASE_TESTING=1 AUTOMATED_TESTING=1 AUTHOR_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
+   my $env_vars = '   - export AUTOMATED_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
    unless ($is_build_branch) {
       my $install = join ("\n", scalar(@releases) ? (
          '   # Install the lowest possible required version for the dependencies',
