@@ -60,7 +60,7 @@ Development releases on CPAN also work, but you have no idea what is on those CP
 Does it cover the full gamut of Perl versions, or are they just grabbing the latest?  Are they all 
 using the latest module dependencies (which may not be want you want)?
 
-You have more control over your Travis CI platform, so you can set up the environment they way you want
+You have more control over your Travis CI platform, so you can set up the environment the way you want
 it.  That's not to say that the massive CPAN tester army isn't a great boon for Perl, but in the fight
 against bugs, you want every weapon available.
 
@@ -69,7 +69,7 @@ against bugs, you want every weapon available.
 Actually, it's the polar opposite of complicated.  This is literally a full guide on how to make it work:
 
 0 [Sign into Travis CI|http://travis-ci.org/users/auth/github] with your GitHub account.
-0 Flip a bit on your distro.
+0 Flip a bit on your distro through the [profile page|https://travis-ci.org/profile].
 0 Put the [TravisYML|Dist::Zilla::Plugin::TravisYML] plugin in your dist.ini.
 
 There's some extra configuration you can do: build branches, MVDT, etc.  But, that's the basic setup.
