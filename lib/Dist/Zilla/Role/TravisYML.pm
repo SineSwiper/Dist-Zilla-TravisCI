@@ -10,8 +10,8 @@ use MooseX::Has::Sugar;
 use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
 use List::AllUtils qw{ first sum };
-use Acme::Indent qw(ai);  # no idea why this is Acme::
 use File::Slurp;
+use YAML qw{ DumpFile };
 
 use Module::CoreList;
 use version 0.77;
@@ -25,55 +25,31 @@ sub log       { shift->logger->log(@_)       }
 sub log_debug { shift->logger->log_debug(@_) }
 sub log_fatal { shift->logger->log_fatal(@_) }
 
+our @phases = ( ( map { my $phase = $_; (map { $_.'_'.$phase } qw( before after )), $_ } qw( install script ) ), 'after_success', 'after_failure' );
+
+has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for @phases;
+
 ### HACK: Need these rw for ChainSmoking ###
 has build_branch  => ( rw, isa => Str,           default => '/^build\/.*/' );
 has notify_email  => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
 has notify_irc    => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
 has mvdt          => ( rw, isa => Bool,          default => 0              );
+has verbose       => ( rw, isa => Bool,          default => 0              );
+has test_deps     => ( rw, isa => Bool,          default => 0              );
+has test_authordeps => ( rw, isa => Bool,          default => 0              );
 
-has _header => ( ro, isa => Str, lazy, default => sub {
-   ai('
-      language: perl
-      perl:
-         - "5.16"
-         - "5.14"
-         - "5.12"
-         - "5.10"
-   ');
-});
-has _footer => ( ro, isa => Str, lazy, default => sub {
-   my $self = shift;
+has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
+   "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
+] } );
 
-   my $email = $self->notify_email->[0];
-   my $irc   = $self->notify_irc->[0];
-   my $zilla = $self->zilla;
-   my $rmeta = $self->zilla->distmeta->{resources};
+has perl_version  => ( rw, isa => ArrayRef[Str], default => sub { [
+   "5.16",
+   "5.14",
+   "5.12",
+   "5.10",
+] } );
 
-   no warnings 'numeric';  # *grumble*
-
-   $irc == 1 and $irc = $self->notify_irc->[0] = $rmeta->{ first { /irc$/i } keys %$rmeta } || 0;
-   s#^irc:|/+##gi for @{$self->notify_irc};
-
-   my $footer = '';
-   # Travis-CI default is to set email, but not use IRC
-   unless ($email == 1 && !$irc) {
-      $footer .=               "notifications:\n";
-      $footer .= $email == 0 ? "   email: false\n" :
-                 $email == 1 ? "" :
-                               "   email:\n".join("\n", map { '      - "'.$_.'"'; } grep { $_ } @{$self->notify_email})."\n";
-      $footer .= "   irc:\n".
-                 "      channels:\n".
-                 join("\n", map { '         - "'.$_.'"'; } grep { $_ } @{$self->notify_irc })."\n".
-                 "      template:\n".
-                 '         - "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})"'."\n".
-                 "      on_success: change\n".
-                 "      on_failure: always\n".
-                 "      use_notice: true\n"
-         if ($irc);
-   }
-
-   return $footer;
-});
+has extra_env     => ( rw, isa => ArrayRef[Str], default => sub { [] });
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;
@@ -88,7 +64,7 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
          $prereqs->requirements_for('runtime', 'requires')->requirements_for_module('perl') ||
          v5.8.8  # released in 2006... C'mon, people!  Don't make me lower this!
       );
-      foreach my $phase (qw(runtime configure build test)) {
+      foreach my $phase (qw( runtime configure build test )) {
          $self->logger->set_prefix("{Phase '$phase'} ");
          my $req = $prereqs->requirements_for($phase, 'requires');
 
@@ -115,82 +91,134 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    return \@releases;
 });
 
+sub _get_exports { shift; map { "export ".$_ } @_ }
+
 sub build_travis_yml {
    my ($self, $is_build_branch) = @_;
 
-   my $header   = $self->_header;
-   my $footer   = $self->_footer;
+   my $zilla = $self->zilla;
+
+   my %travisyml = ( language => "perl", perl => [] );
+   for (@{$self->perl_version}) {
+      push @{$travisyml{perl}}, $_;
+   }
+
+   my $email = $self->notify_email->[0];
+   my $irc   = $self->notify_irc->[0];
+   my $rmeta = $self->zilla->distmeta->{resources};
+
+   $irc eq "1" and $irc = $self->notify_irc->[0] = $rmeta->{ first { /irc$/i } keys %$rmeta } || "0";
+   s#^irc:|/+##gi for @{$self->notify_irc};
+
+   my %notifications;
+
+   unless ($email eq "1") {
+      if ($email eq "0") {
+         $notifications{email} = \"false";
+      } else {
+         $notifications{email} = [grep { $_ } @{$self->notify_email}];
+      }
+   }
+
+   if ($irc) {
+      my %irc = (
+         on_success => 'change',
+         on_failure => 'always',
+         use_notice => 'true',
+      );
+      $irc{channels} = [grep { $_ } @{$self->notify_irc}];
+      $irc{template} = [grep { $_ } @{$self->irc_template}];
+      $notifications{irc} = \%irc;
+   }
+
+   if (%notifications) {
+      $travisyml{notifications} = \%notifications;
+   }
+
+   my @base_envs = qw(
+      AUTOMATED_TESTING=1
+      HARNESS_OPTIONS=j10:c
+      HARNESS_TIMER=1
+   );
+
+   my @env_exports = $self->_get_exports(@base_envs, @{$self->extra_env});
+
+   my %phases = map { $_ => $self->$_ } @phases;
+
    my @releases = @{$self->_releases};
 
-   my $env_vars = '   - export AUTOMATED_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
-   unless ($is_build_branch) {
-      my $install = join ("\n", scalar(@releases) ? (
-         '   # Install the lowest possible required version for the dependencies',
-         $env_vars,
-         '   - export OLD_CPANM_OPT=$PERL_CPANM_OPT',
-         "   - export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN '\$PERL_CPANM_OPT",
-         (map { '   - cpanm --verbose '.$_ } @releases),
-         '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
-      ) : (
-         $env_vars,
-         "   - dzil listdeps | grep -vP '[^\\w:]' | cpanm --verbose"
-      ) );
+   my @releases_install;
 
-      File::Slurp::write_file( '.travis.yml', join("\n",
-         $header,
-
-         # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
-         'before_install:',
-         '   # Prevent "Please tell me who you are" errors for certain DZIL configs',
-         '   - git config --global user.name "TravisCI"',
-         '   - git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
-
-         ai("
-            install:
-               # Deal with all of the DZIL dependancies, quickly and quietly
-               - cpanm --quiet --notest --skip-satisfied Dist::Zilla
-               - dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied
-         "),
-         $install,
-         'script:',
-         '   - dzil smoke --release --author',
-         $footer,
-      ) );
-   }
-   elsif (my $bbranch = $self->build_branch) {
-      my $install = join ("\n", scalar(@releases) ? (
-         'install:',
-         '   # Install the lowest possible required version for the dependencies',
-         $env_vars,
-         '   - export OLD_CPANM_OPT=$PERL_CPANM_OPT',
-         "   - export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN '\$PERL_CPANM_OPT",
-         (map { '   - cpanm --verbose '.$_ } @releases),
-         '   - export PERL_CPANM_OPT=$OLD_CPANM_OPT',
-      ) : (
-         'install:',
-         $env_vars,
-         '   - cpanm --installdeps --notest --skip-satisfied .',
-      ) );
-
-      File::Slurp::write_file(
-         Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify,
-         join("\n",
-            $header,
-            'before_install:',
-            '   # Prevent any test problems with this file',
-            '   - rm .travis.yml',
-            $install,
-            '',
-            ai("
-               # whitelist
-               branches:
-                  only:
-                    - $bbranch
-            "),
-            $footer,
-         )
+   if (@releases) {
+      @releases_install = (
+         'export OLD_CPANM_OPT=$PERL_CPANM_OPT',
+         "export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN' \$PERL_CPANM_OPT",
+         (map { 'cpanm --verbose '.$_ } @releases),
+         'export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       );
    }
+
+   my $verbose = $self->verbose ? ' --verbose ' : ' --quiet ';
+
+   unless ($is_build_branch) {
+
+      unless (@{$phases{before_install}}) {
+         push @{$phases{before_install}}, (
+            'git config --global user.name "TravisCI"',
+            'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
+         );
+      }
+
+      if (@releases) {
+         $phases{install} = \@releases_install
+      } else {
+         unless (@{$phases{install}}) {
+            push @{$phases{install}}, (
+               "cpanm ".$verbose." --notest --skip-satisfied Dist::Zilla",
+               "dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm ".$verbose." ".($self->test_authordeps ? "" : " --notest ")." --skip-satisfied",
+               "dzil listdeps | grep -vP '[^\\w:]' | cpanm ".$verbose." ".($self->test_deps ? "" : " --notest ")." --skip-satisfied",
+            );
+         }
+      }
+
+      unless (@{$phases{script}}) {
+         push @{$phases{script}}, "dzil smoke --release --author";
+      }
+
+   } elsif (my $bbranch = $self->build_branch) {
+
+      if (@releases) {
+         $phases{install} = \@releases_install;
+      } else {
+         $phases{install} = [
+            'cpanm --installdeps '.$verbose.' '.($self->test_deps ? "" : "--notest").' --skip-satisfied .',
+         ];
+      }
+
+      unshift @{$phases{before_install}}, (
+         'rm .travis.yml',
+      );
+
+      $travisyml{branches} = { only => $bbranch };
+
+   }
+
+   push @{$phases{install}}, @{delete $phases{after_install}};
+
+   for (keys %phases) {
+      my @commands = @{$phases{$_}};
+      if (@commands) {
+         $travisyml{$_} = [
+            @env_exports,
+            @commands,
+         ]
+      } else {
+         delete $phases{$_};
+      }
+   }
+
+   DumpFile(Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify, \%travisyml);
+
 }
 
 sub _as_lucene_query {
