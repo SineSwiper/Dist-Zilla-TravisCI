@@ -27,7 +27,12 @@ around mvp_multivalue_args => sub {
    my @start = $self->$orig;
    return (
       @start, qw(notify_email notify_irc perl_version irc_template extra_env),
-      (map { $_, 'pre_'.$_, 'post_'.$_ } @Dist::Zilla::Role::TravisYML::phases),
+      ### XXX: Yes, this ends up being 7*3*3=63 attributes, but such is the price of progress...
+      (
+         map { $_, $_.'_dzil', $_.'_build' }
+         map { $_, 'pre_'.$_, 'post_'.$_ }
+         @Dist::Zilla::Role::TravisYML::phases
+      ),
    );
 };
 

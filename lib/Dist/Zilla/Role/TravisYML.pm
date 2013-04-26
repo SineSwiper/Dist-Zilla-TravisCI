@@ -11,7 +11,7 @@ use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
 use List::AllUtils qw{ first sum };
 use File::Slurp;
-use YAML qw{ Dump };
+use YAML qw{ DumpFile };
 
 use Module::CoreList;
 use version 0.77;
@@ -44,7 +44,11 @@ my @yml_order = (qw(
 
 
 ### HACK: Need these rw for ChainSmoking ###
-has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for (map { $_, 'pre_'.$_, 'post_'.$_ } @phases);
+has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for (
+   map { $_, $_.'_dzil', $_.'_build' }
+   map { $_, 'pre_'.$_, 'post_'.$_ }
+   @phases
+);
 
 has build_branch    => ( rw, isa => Str,           default => '/^build\/.*/' );
 has notify_email    => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
@@ -197,32 +201,44 @@ sub build_travis_yml {
 
       $travis_yml{'branches'} = { only => $bbranch };
    }
+   else {
+      return;  # no point in staying here...
+   }
 
    ### See if any custom code is requested
    
+   my $ft_suffix = $is_build_branch ? '_build' : '_dzil';
    foreach my $phase (@phases) {
       # First, replace any new blocks, then deal with pre/post blocks
-      my $custom_cmds = $self->$phase;
-      $travis_yml{$phase} = [ @$custom_cmds ] if ($custom_cmds && @$custom_cmds);
+      foreach my $f ('', $ft_suffix) {  # YML file type; specific wins priority
+         my $method = $phase.$f;
+         my $custom_cmds = $self->$method;
+         $travis_yml{$phase} = [ @$custom_cmds ] if ($custom_cmds && @$custom_cmds);
+      }
       
-      foreach my $t (qw(pre post)) {
-         my $method = $t.'_'.$phase;
-         my $tcmds = $self->$method;
-         
-         if ($tcmds && @$tcmds) {
-            $t eq 'pre' ?
-               unshift(@{$travis_yml{$phase}}, @$tcmds) :
-               push   (@{$travis_yml{$phase}}, @$tcmds)
-            ;
+      foreach my $f ('', $ft_suffix) {
+         foreach my $t (qw(pre post)) {
+            my $method = $t.'_'.$phase.$f;
+            my $custom_cmds = $self->$method;
+            
+            if ($custom_cmds && @$custom_cmds) {
+               $t eq 'pre' ?
+                  unshift(@{$travis_yml{$phase}}, @$custom_cmds) :
+                  push   (@{$travis_yml{$phase}}, @$custom_cmds)
+               ;
+            }
          }
       }
    }
    
+   ### Dump YML (in order)
+   local $YAML::Indent    = 3;
+   local $YAML::UseHeader = 0;
+
    my $node = YAML::Bless(\%travis_yml);
    $node->keys([grep { exists $travis_yml{$_} } @yml_order]);
-   my $YML = Dump(\%travis_yml);
-   $self->log("Rebuilding .travis.yml");
-   Path::Class::File->new($self->zilla->built_in, '.travis.yml')->spew($YML);
+   $self->log( "Rebuilding .travis.yml".($is_build_branch ? ' (in build dir)' : '') );
+   DumpFile(Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify, \%travis_yml);
 }
 
 sub _as_lucene_query {
