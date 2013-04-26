@@ -25,7 +25,7 @@ sub log       { shift->logger->log(@_)       }
 sub log_debug { shift->logger->log_debug(@_) }
 sub log_fatal { shift->logger->log_fatal(@_) }
 
-our @phases = ( ( map { my $phase = $_; (map { $_.'_'.$phase } qw( before after )), $_ } qw( install script ) ), 'after_success', 'after_failure' );
+our @phases = ( ( map { my $phase = $_; ('before_'.$phase, $phase, 'after_'.$phase) } qw( install script ) ), 'after_success', 'after_failure' );
 
 has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for @phases;
 
@@ -33,6 +33,7 @@ has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for @phases;
 has build_branch  => ( rw, isa => Str,           default => '/^build\/.*/' );
 has notify_email  => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
 has notify_irc    => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
+has requires      => ( rw, isa => ArrayRef[Str], default => sub { [] }     );
 has mvdt          => ( rw, isa => Bool,          default => 0              );
 has verbose       => ( rw, isa => Bool,          default => 0              );
 has test_deps     => ( rw, isa => Bool,          default => 0              );
@@ -143,7 +144,7 @@ sub build_travis_yml {
 
    my @env_exports = $self->_get_exports(@base_envs, @{$self->extra_env});
 
-   my %phases = map { $_ => $self->$_ } @phases;
+   my %phases_commands = map { $_ => $self->$_ } @phases;
 
    my @releases = @{$self->_releases};
 
@@ -162,18 +163,19 @@ sub build_travis_yml {
 
    unless ($is_build_branch) {
 
-      unless (@{$phases{before_install}}) {
-         push @{$phases{before_install}}, (
-            'git config --global user.name "TravisCI"',
-            'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
-         );
-      }
+      unshift @{$phases_commands{before_install}}, (
+         'git config --global user.name "TravisCI"',
+         'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
+      );
 
       if (@releases) {
-         $phases{install} = \@releases_install
+         $phases_commands{install} = \@releases_install
       } else {
-         unless (@{$phases{install}}) {
-            push @{$phases{install}}, (
+         unless (@{$phases_commands{install}}) {
+            if (@{$self->requires}) {
+               push @{$phases_commands{install}}, "sudo apt-get install -qq ".join(" ",@{$self->requires});
+            }
+            push @{$phases_commands{install}}, (
                "cpanm ".$verbose." --notest --skip-satisfied Dist::Zilla",
                "dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm ".$verbose." ".($self->test_authordeps ? "" : " --notest ")." --skip-satisfied",
                "dzil listdeps | grep -vP '[^\\w:]' | cpanm ".$verbose." ".($self->test_deps ? "" : " --notest ")." --skip-satisfied",
@@ -181,21 +183,21 @@ sub build_travis_yml {
          }
       }
 
-      unless (@{$phases{script}}) {
-         push @{$phases{script}}, "dzil smoke --release --author";
+      unless (@{$phases_commands{script}}) {
+         push @{$phases_commands{script}}, "dzil smoke --release --author";
       }
 
    } elsif (my $bbranch = $self->build_branch) {
 
       if (@releases) {
-         $phases{install} = \@releases_install;
+         $phases_commands{install} = \@releases_install;
       } else {
-         $phases{install} = [
+         $phases_commands{install} = [
             'cpanm --installdeps '.$verbose.' '.($self->test_deps ? "" : "--notest").' --skip-satisfied .',
          ];
       }
 
-      unshift @{$phases{before_install}}, (
+      unshift @{$phases_commands{before_install}}, (
          'rm .travis.yml',
       );
 
@@ -203,17 +205,18 @@ sub build_travis_yml {
 
    }
 
-   push @{$phases{install}}, @{delete $phases{after_install}};
+   push @{$phases_commands{install}}, @{delete $phases_commands{after_install}};
 
-   for (keys %phases) {
-      my @commands = @{$phases{$_}};
+   my $first = 0;
+   for (@phases) {
+      next unless defined $phases_commands{$_};
+      my @commands = @{$phases_commands{$_}};
       if (@commands) {
          $travisyml{$_} = [
-            @env_exports,
+            $first ? () : (@env_exports),
             @commands,
-         ]
-      } else {
-         delete $phases{$_};
+         ];
+         $first = 1;
       }
    }
 
