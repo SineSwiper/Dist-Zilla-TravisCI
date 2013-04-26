@@ -34,6 +34,9 @@ has build_branch  => ( rw, isa => Str,           default => '/^build\/.*/' );
 has notify_email  => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
 has notify_irc    => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
 has mvdt          => ( rw, isa => Bool,          default => 0              );
+has verbose       => ( rw, isa => Bool,          default => 0              );
+has test_deps     => ( rw, isa => Bool,          default => 0              );
+has test_authordeps => ( rw, isa => Bool,          default => 0              );
 
 has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
@@ -155,6 +158,8 @@ sub build_travis_yml {
       );
    }
 
+   my $verbose = $self->verbose ? ' --verbose ' : ' --quiet ';
+
    unless ($is_build_branch) {
 
       unless (@{$phases{before_install}}) {
@@ -169,9 +174,9 @@ sub build_travis_yml {
       } else {
          unless (@{$phases{install}}) {
             push @{$phases{install}}, (
-               "cpanm --quiet --notest --skip-satisfied Dist::Zilla",
-               "dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied",
-               "dzil listdeps | grep -vP '[^\\w:]' | cpanm --verbose",
+               "cpanm ".$verbose." --notest --skip-satisfied Dist::Zilla",
+               "dzil authordeps --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm ".$verbose." ".($self->test_authordeps ? "" : "--notest")." --skip-satisfied",
+               "dzil listdeps --missing | grep -vP '[^\\w:]' | cpanm -".$verbose." ".($self->test_deps ? "" : "--notest")." --skip-satisfied",
             );
          }
       }
@@ -186,7 +191,7 @@ sub build_travis_yml {
          $phases{install} = \@releases_install;
       } else {
          $phases{install} = [
-            'cpanm --installdeps --notest --skip-satisfied .',
+            'cpanm --installdeps '.$verbose.' '.($self->test_deps ? "" : "--notest").' --skip-satisfied .',
          ];
       }
 
@@ -197,6 +202,8 @@ sub build_travis_yml {
       $travisyml{branches} = { only => $bbranch };
 
    }
+
+   push @{$phases{install}}, @{delete $phases{after_install}};
 
    for (keys %phases) {
       my @commands = @{$phases{$_}};
