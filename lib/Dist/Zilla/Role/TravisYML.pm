@@ -175,8 +175,8 @@ sub build_travis_yml {
          unless (@{$phases{install}}) {
             push @{$phases{install}}, (
                "cpanm ".$verbose." --notest --skip-satisfied Dist::Zilla",
-               "dzil authordeps --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm ".$verbose." ".($self->test_authordeps ? "" : "--notest")." --skip-satisfied",
-               "dzil listdeps --missing | grep -vP '[^\\w:]' | cpanm -".$verbose." ".($self->test_deps ? "" : "--notest")." --skip-satisfied",
+               "dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm ".$verbose." ".($self->test_authordeps ? "" : " --notest ")." --skip-satisfied",
+               "dzil listdeps | grep -vP '[^\\w:]' | cpanm ".$verbose." ".($self->test_deps ? "" : " --notest ")." --skip-satisfied",
             );
          }
       }
