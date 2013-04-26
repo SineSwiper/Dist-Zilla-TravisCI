@@ -11,7 +11,7 @@ use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
 use List::AllUtils qw{ first sum };
 use File::Slurp;
-use YAML qw{ DumpFile };
+use YAML qw{ Dump };
 
 use Module::CoreList;
 use version 0.77;
@@ -25,18 +25,26 @@ sub log       { shift->logger->log(@_)       }
 sub log_debug { shift->logger->log_debug(@_) }
 sub log_fatal { shift->logger->log_fatal(@_) }
 
-our @phases = ( ( map { my $phase = $_; (map { $_.'_'.$phase } qw( before after )), $_ } qw( install script ) ), 'after_success', 'after_failure' );
-
-has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for @phases;
+my %phase_order = (
+   before_install => 10,
+   install        => 11,
+   before_script  => 12,
+   script         => 13,
+   after_success  => 14,
+   after_failure  => 15,
+   after_script   => 16,
+);
+our @phases = sort { $phase_order{$a} <=> $phase_order{$b} } keys %phase_order;
 
 ### HACK: Need these rw for ChainSmoking ###
-has build_branch  => ( rw, isa => Str,           default => '/^build\/.*/' );
-has notify_email  => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
-has notify_irc    => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
-has mvdt          => ( rw, isa => Bool,          default => 0              );
-has verbose       => ( rw, isa => Bool,          default => 0              );
-has test_deps     => ( rw, isa => Bool,          default => 0              );
+has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for (map { $_, 'pre_'.$_, 'post_'.$_ } @phases);
+
+has build_branch    => ( rw, isa => Str,           default => '/^build\/.*/' );
+has notify_email    => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
+has notify_irc      => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
+has mvdt            => ( rw, isa => Bool,          default => 0              );
 has test_authordeps => ( rw, isa => Bool,          default => 0              );
+has test_deps       => ( rw, isa => Bool,          default => 1              );
 
 has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
@@ -91,34 +99,23 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    return \@releases;
 });
 
-sub _get_exports { shift; map { "export ".$_ } @_ }
-
 sub build_travis_yml {
    my ($self, $is_build_branch) = @_;
 
    my $zilla = $self->zilla;
 
-   my %travisyml = ( language => "perl", perl => [] );
-   for (@{$self->perl_version}) {
-      push @{$travisyml{perl}}, $_;
-   }
+   ### HACK: Numbering on the main keys to maintain some basic YML ordering; will remove later ###
+   my %travis_yml = ( '01_language' => "perl", '02_perl' => [ @{$self->perl_version} ] );
 
    my $email = $self->notify_email->[0];
    my $irc   = $self->notify_irc->[0];
    my $rmeta = $self->zilla->distmeta->{resources};
 
-   $irc eq "1" and $irc = $self->notify_irc->[0] = $rmeta->{ first { /irc$/i } keys %$rmeta } || "0";
-   s#^irc:|/+##gi for @{$self->notify_irc};
-
    my %notifications;
 
-   unless ($email eq "1") {
-      if ($email eq "0") {
-         $notifications{email} = \"false";
-      } else {
-         $notifications{email} = [grep { $_ } @{$self->notify_email}];
-      }
-   }
+   # IRC
+   $irc eq "1" and $irc = $self->notify_irc->[0] = $rmeta->{ first { /irc$/i } keys %$rmeta } || "0";
+   s#^irc:|/+##gi for @{$self->notify_irc};
 
    if ($irc) {
       my %irc = (
@@ -131,94 +128,102 @@ sub build_travis_yml {
       $notifications{irc} = \%irc;
    }
 
-   if (%notifications) {
-      $travisyml{notifications} = \%notifications;
-   }
+   # Email
+   $notifications{email} = ($email eq "0") ? \"false" : [ grep { $_ } @{$self->notify_email} ]
+      unless ($email eq "1");
 
-   my @base_envs = qw(
-      AUTOMATED_TESTING=1
-      HARNESS_OPTIONS=j10:c
-      HARNESS_TIMER=1
+   $travis_yml{'90_notifications'} = \%notifications if (%notifications);
+
+   # export ENV variables
+   my $env_exports = 'export '.join(' ', 
+      qw(
+         AUTOMATED_TESTING=1
+         HARNESS_OPTIONS=j10:c
+         HARNESS_TIMER=1
+      ), @{$self->extra_env}
    );
 
-   my @env_exports = $self->_get_exports(@base_envs, @{$self->extra_env});
+   my %phases_yml;
 
-   my %phases = map { $_ => $self->$_ } @phases;
+   ### Prior to the custom mangling by the user, establish a default .travis.yml to work from
 
+   # needed for MDVT
    my @releases = @{$self->_releases};
-
    my @releases_install;
-
    if (@releases) {
       @releases_install = (
+         # Install the lowest possible required version for the dependencies
          'export OLD_CPANM_OPT=$PERL_CPANM_OPT',
          "export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN' \$PERL_CPANM_OPT",
          (map { 'cpanm --verbose '.$_ } @releases),
          'export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       );
    }
-
-   my $verbose = $self->verbose ? ' --verbose ' : ' --quiet ';
-
+   
    unless ($is_build_branch) {
-
-      unless (@{$phases{before_install}}) {
-         push @{$phases{before_install}}, (
+      # verbosity/testing and parallelized installs don't mix
+      my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied';
+      my $test_cmd   = 'cpanm --verbose --skip-satisfied';
+      
+      %phases_yml = (
+         before_install => [
+            $env_exports,
+            # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
             'git config --global user.name "TravisCI"',
             'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
-         );
-      }
-
-      if (@releases) {
-         $phases{install} = \@releases_install
-      } else {
-         unless (@{$phases{install}}) {
-            push @{$phases{install}}, (
-               "cpanm ".$verbose." --notest --skip-satisfied Dist::Zilla",
-               "dzil authordeps | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm ".$verbose." ".($self->test_authordeps ? "" : " --notest ")." --skip-satisfied",
-               "dzil listdeps | grep -vP '[^\\w:]' | cpanm ".$verbose." ".($self->test_deps ? "" : " --notest ")." --skip-satisfied",
-            );
-         }
-      }
-
-      unless (@{$phases{script}}) {
-         push @{$phases{script}}, "dzil smoke --release --author";
-      }
-
-   } elsif (my $bbranch = $self->build_branch) {
-
-      if (@releases) {
-         $phases{install} = \@releases_install;
-      } else {
-         $phases{install} = [
-            'cpanm --installdeps '.$verbose.' '.($self->test_deps ? "" : "--notest").' --skip-satisfied .',
-         ];
-      }
-
-      unshift @{$phases{before_install}}, (
-         'rm .travis.yml',
+         ],
+         install => scalar(@releases) ? \@releases_install : [
+            "cpanm --quiet --notest --skip-satisfied Dist::Zilla",  # this should already exist anyway...
+            "dzil authordeps | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
+            "dzil listdeps   | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
+         ],
+         script => [
+            "dzil smoke --release --author"
+         ],
+      );
+   }
+   elsif (my $bbranch = $self->build_branch) {
+      %phases_yml = (
+         before_install => [
+            $env_exports,
+            # Prevent any test problems with this file
+            'rm .travis.yml',
+         ],
+         install => scalar(@releases) ? \@releases_install : [
+            'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' --skip-satisfied .',
+         ],
       );
 
-      $travisyml{branches} = { only => $bbranch };
-
+      $travis_yml{'05_branches'} = { only => $bbranch };
    }
 
-   push @{$phases{install}}, @{delete $phases{after_install}};
-
-   for (keys %phases) {
-      my @commands = @{$phases{$_}};
-      if (@commands) {
-         $travisyml{$_} = [
-            @env_exports,
-            @commands,
-         ]
-      } else {
-         delete $phases{$_};
+   ### See if any custom code is requested
+   
+   foreach my $phase (@phases) {
+      # First, replace any new blocks, then deal with pre/post blocks
+      my $custom_cmds = $self->$phase;
+      $phases_yml{$phase} = [ @$custom_cmds ] if ($custom_cmds && @$custom_cmds);
+      
+      foreach my $t (qw(pre post)) {
+         my $method = $t.'_'.$phase;
+         my $tcmds = $self->$method;
+         
+         if ($tcmds && @$tcmds) {
+            $t eq 'pre' ?
+               unshift(@{$phases_yml{$phase}}, @$tcmds) :
+               push   (@{$phases_yml{$phase}}, @$tcmds)
+            ;
+         }
       }
+      
+      # Add ordering numerals on keys, while we put it into the YML hash
+      $travis_yml{ $phase_order{$phase}."_$phase" } = delete $phases_yml{$phase} if ($phases_yml{$phase});
    }
-
-   DumpFile(Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify, \%travisyml);
-
+   
+   ### Dump, tweak, and spew
+   my $YML = Dump(\%travis_yml);
+   $YML =~ s/^\d{2}_(?=\w+:)//gm;  # remove the ordering numerals
+   Path::Class::File->new($self->zilla->built_in, '.travis.yml')->spew($YML);
 }
 
 sub _as_lucene_query {

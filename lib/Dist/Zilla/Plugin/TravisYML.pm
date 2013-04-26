@@ -25,7 +25,10 @@ around mvp_multivalue_args => sub {
    my ($orig, $self) = @_;
    
    my @start = $self->$orig;
-   return (@start, 'notify_email', 'notify_irc', 'perl_version', 'irc_template', 'extra_env', @Dist::Zilla::Role::TravisYML::phases);
+   return (
+      @start, qw(notify_email notify_irc perl_version irc_template extra_env),
+      (map { $_, 'pre_'.$_, 'post_'.$_ } @Dist::Zilla::Role::TravisYML::phases),
+   );
 };
 
 sub prune_files {

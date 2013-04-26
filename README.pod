@@ -10,6 +10,7 @@ Dist::Zilla::TravisCI - Travis CI plugins for your DZIL-based distribution
 
     [@Prereqs]
     [TravisYML]
+ 
     [Git::CommitBuild]
     release_branch  = build/%b
     release_message = Release build of v%v (on %b)
@@ -162,7 +163,7 @@ those networks/channels and get help:
 
 irc.perl.org
 
-You can connect to the server at 'irc.perl.org' and join this channel: #distzilla then talk to this person for help: SineSwiper.
+You can connect to the server at 'irc.perl.org' and talk to this person for help: SineSwiper.
 
 =back
 
@@ -170,9 +171,19 @@ You can connect to the server at 'irc.perl.org' and join this channel: #distzill
 
 Please report any bugs or feature requests via L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues>.
 
-=head1 AUTHOR
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 Brendan Byrd <BBYRD@CPAN.org>
+
+=item *
+
+Torsten Raudssus <torsten@raudss.us>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
