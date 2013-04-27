@@ -171,13 +171,17 @@ You can connect to the server at 'irc.perl.org' and talk to this person for help
 
 Please report any bugs or feature requests via L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues>.
 
-=head1 AUTHORS
+=head1 AUTHOR
+
+Brendan Byrd <bbyrd@cpan.org>
+
+=head1 CONTRIBUTORS
 
 =over 4
 
 =item *
 
-Brendan Byrd <BBYRD@CPAN.org>
+Graham Knop <haarg@haarg.org>
 
 =item *
 

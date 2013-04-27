@@ -62,12 +62,7 @@ has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
 ] } );
 
-has perl_version  => ( rw, isa => ArrayRef[Str], default => sub { [
-   "5.16",
-   "5.14",
-   "5.12",
-   "5.10",
-] } );
+has perl_version  => ( rw, isa => Str, default => '5.16 5.14 5.12 5.10' );
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;
@@ -114,8 +109,7 @@ sub build_travis_yml {
 
    my $zilla = $self->zilla;
 
-   ### HACK: Numbering on the main keys to maintain some basic YML ordering; will remove later ###
-   my %travis_yml = ( 'language' => "perl", 'perl' => [ @{$self->perl_version} ] );
+   my %travis_yml = ( 'language' => 'perl', 'perl' => [ split(/\s+/, $self->perl_version) ] );
 
    my $email = $self->notify_email->[0];
    my $irc   = $self->notify_irc->[0];
@@ -202,19 +196,19 @@ sub build_travis_yml {
    my $ft_suffix = $is_build_branch ? '_build' : '_dzil';
    foreach my $phase (@phases) {
       # First, replace any new blocks, then deal with pre/post blocks
-      foreach my $f ('', $ft_suffix) {  # YML file type; specific wins priority
-         my $method = $phase.$f;
+      foreach my $ft ('', $ft_suffix) {  # YML file type; specific wins priority
+         my $method = $phase.$ft;
          my $custom_cmds = $self->$method;
          $travis_yml{$phase} = [ @$custom_cmds ] if ($custom_cmds && @$custom_cmds);
       }
       
-      foreach my $f ('', $ft_suffix) {
-         foreach my $t (qw(pre post)) {
-            my $method = $t.'_'.$phase.$f;
+      foreach my $ft ('', $ft_suffix) {
+         foreach my $pos (qw(pre post)) {
+            my $method = $pos.'_'.$phase.$ft;
             my $custom_cmds = $self->$method;
             
             if ($custom_cmds && @$custom_cmds) {
-               $t eq 'pre' ?
+               $pos eq 'pre' ?
                   unshift(@{$travis_yml{$phase}}, @$custom_cmds) :
                   push   (@{$travis_yml{$phase}}, @$custom_cmds)
                ;
