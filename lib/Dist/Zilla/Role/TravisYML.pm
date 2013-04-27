@@ -25,7 +25,8 @@ sub log       { shift->logger->log(@_)       }
 sub log_debug { shift->logger->log_debug(@_) }
 sub log_fatal { shift->logger->log_fatal(@_) }
 
-my @phases = qw(
+# needs our to pass to mvp_multivalue_args
+our @phases = qw(
    before_install
    install
    before_script
@@ -67,8 +68,6 @@ has perl_version  => ( rw, isa => ArrayRef[Str], default => sub { [
    "5.12",
    "5.10",
 ] } );
-
-has extra_env     => ( rw, isa => ArrayRef[Str], default => sub { [] });
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;
@@ -145,14 +144,7 @@ sub build_travis_yml {
 
    $travis_yml{'notifications'} = \%notifications if (%notifications);
 
-   # export ENV variables
-   my $env_exports = 'export '.join(' ', 
-      qw(
-         AUTOMATED_TESTING=1
-         HARNESS_OPTIONS=j10:c
-         HARNESS_TIMER=1
-      ), @{$self->extra_env}
-   );
+   my $env_exports = 'export AUTOMATED_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
 
    ### Prior to the custom mangling by the user, establish a default .travis.yml to work from
 
