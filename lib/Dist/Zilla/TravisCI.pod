@@ -85,9 +85,6 @@ to make it what it is.
 
 = TODO
 
-* *MVDT* - Yes, I actually need to finish MVDT on my own distros.  I have an excuse, though: I need this
-in CPAN in order for Travis to download it.  Hopefully, I can get this finished soon now...
-* *Tests* - This has actually been well-tested via other modules, but I still need to add in a test
-platform here.  Kinda sad, actually...
+* *MVDT* - Yes, I actually need to finish MVDT on my own distros.
 
 =end wikidoc
