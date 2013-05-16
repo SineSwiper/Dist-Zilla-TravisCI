@@ -128,13 +128,7 @@ L<Please donate!|https://love.travis-ci.org/>
 
 =item *
 
-B<MVDT> - Yes, I actually need to finish MVDT on my own distros.  I have an excuse, though: I need this
-in CPAN in order for Travis to download it.  Hopefully, I can get this finished soon now...
-
-=item *
-
-B<Tests> - This has actually been well-tested via other modules, but I still need to add in a test
-platform here.  Kinda sad, actually...
+B<MVDT> - Yes, I actually need to finish MVDT on my own distros.
 
 =back
 
