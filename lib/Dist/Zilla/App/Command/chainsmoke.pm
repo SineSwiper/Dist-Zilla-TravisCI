@@ -1,6 +1,6 @@
 package Dist::Zilla::App::Command::chainsmoke;
 
-our $VERSION = '0.96'; # VERSION
+our $VERSION = '0.98'; # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 
 use sanity;
@@ -51,8 +51,8 @@ sub execute {
 }
 
 42;
- 
 
+__END__
 
 =pod
 
@@ -126,7 +126,21 @@ site near you, or see L<https://metacpan.org/module/Dist::Zilla::TravisCI/>.
 
 =head1 AUTHOR
 
-Brendan Byrd <BBYRD@CPAN.org>
+Brendan Byrd <bbyrd@cpan.org>
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Graham Knop <haarg@haarg.org>
+
+=item *
+
+Torsten Raudssus <torsten@raudss.us>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -137,7 +151,3 @@ This is free software, licensed under:
   The Artistic License 2.0 (GPL Compatible)
 
 =cut
-
-
-__END__
-

@@ -1,8 +1,115 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v0.98 2013-05-16
+----------------
+
+commit 386ec487c10a73cf56e0e624faae02b1b71a7814
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Sat Apr 27 16:29:56 2013 -0400
+
+    Remove TODO item about test platform
+
+commit 806abe2c111b88801bbc20f3a569b602a71b630a
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Sat Apr 27 16:08:15 2013 -0400
+
+    Add documentation of new features
+    Change perl_version to space-delimited string
+    Add .mailmap for Contributers section
+
+commit 9c2881cbd8d82298c58cbb22e4d8f8ece0e8df29
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Sat Apr 27 09:40:02 2013 -0400
+
+    Fix "our @phases" bug
+    Remove extra_env (as it is redundant with pre_before_install)
+    Add test plan (finally!)
+
+commit c3fc2e9c83d8a6ffbd136d1495254b5ece5becb4
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Apr 26 17:16:18 2013 -0400
+
+    Add support for build/dzil block manipulation
+    Minor tweaks to YAML
+    Add note about build vs. dzil file in log
+
+commit 85a1051186ce5dc996898b2e395ec89c780f364a
+Author: Graham Knop <haarg@haarg.org>
+Date:   Fri Apr 26 10:35:40 2013 -0400
+
+    use api for YAML ordering instead of text munging
+
+commit 6e5d88bba3c396ae4f77fcc4711ae5d625b610fe
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Thu Apr 25 23:17:10 2013 -0400
+
+    Clean up some of the refactoring
+    
+    Added pre/post/$_ logic, for maximum control of added commands
+    Added phase ordering to keep some command sanity on larger YML files
+    Removed verbose param, since verbosity/testing/parallelization are linked
+    test_deps defaults to 1, per original behavior
+
+commit c5305b64812b7b68eee1430340b1dab3e5cec3d3
+Author: Torsten Raudssus <torsten@raudss.us>
+Date:   Fri Apr 26 02:35:54 2013 +0200
+
+    Last typos fixed...
+
+commit c2db9a2adb1b9916e8821af857ad1e6e8e1a6760
+Author: Torsten Raudssus <torsten@raudss.us>
+Date:   Fri Apr 26 02:12:10 2013 +0200
+
+    More tuning and parameters... Making it most quiet and effective by default
+
+commit 3bc6b468dab65e5f53e6b5e60e84da60daf2b398
+Author: Torsten Raudssus <torsten@raudss.us>
+Date:   Fri Apr 26 01:35:12 2013 +0200
+
+    More or less rewrite.... ;)
+
+v0.97 2013-04-22
+----------------
+
+commit f0352b1018a2da533bdecf76f9d9cc082a46b57e
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Mon Apr 22 22:59:59 2013 -0400
+
+    Release v0.97
+
+commit a931cc1786bfc54549cfde943012638016443911
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Mon Apr 22 22:43:47 2013 -0400
+
+    Fix up docs a bit (fixes Issue #3)
+
+commit 6088b1e2a39dfd6baff3b843d6859675538c0c01
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Mon Apr 22 22:11:12 2013 -0400
+
+    Remove weaver.ini (now in PW BBYRD bundle)
+
+commit ea6284f9e00e742c2c2c1cbbbb5185c2aef51537
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Mon Apr 22 15:20:24 2013 -0400
+
+    Fix email missing "Please tell me who you are" errors
+
+commit aad3b6f2834d32ef1ec140ce77abf703bdccb8df
+Author: Torsten Raudssus <torsten@raudss.us>
+Date:   Sun Apr 21 04:45:34 2013 +0200
+
+    I don't think it should be really doing AUTHOR and RELEASE testing for the dependencies
+
 v0.96 2013-03-19
 ----------------
+
+commit b522f310dc2f23727dbeec66b8b732b4e9e7f39b
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Tue Mar 19 14:24:59 2013 -0400
+
+    Release v0.96
 
 commit ef99496fcc3cb3771f0a1283d7f5e24cd286a803
 Author: Brendan Byrd <Perl@ResonatorSoft.org>

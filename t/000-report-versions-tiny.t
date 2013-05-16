@@ -48,7 +48,6 @@ sub pmver {
     return sprintf('%-45s => %-10s%-15s%s', $module, $pmver, $wanted, "\n");
 }
 
-eval { $v .= pmver('Acme::Indent','0.01') };
 eval { $v .= pmver('Dist::Zilla','1.093220') };
 eval { $v .= pmver('Dist::Zilla::Plugin::Git::Check','1.093250') };
 eval { $v .= pmver('Dist::Zilla::Role::Git::DirtyFiles','1.100740') };
@@ -66,8 +65,11 @@ eval { $v .= pmver('Moose::Autobox','0.09') };
 eval { $v .= pmver('MooseX::Has::Sugar','0.0100') };
 eval { $v .= pmver('MooseX::Types::Moose','any version') };
 eval { $v .= pmver('Test::CheckDeps','0.002') };
+eval { $v .= pmver('Test::DZil','4.200002') };
+eval { $v .= pmver('Test::More','0.94') };
+eval { $v .= pmver('Test::Most','0.01') };
 eval { $v .= pmver('Test::Pod','1.41') };
-eval { $v .= pmver('Test::UseAllModules','0.10') };
+eval { $v .= pmver('YAML','0.67') };
 eval { $v .= pmver('sanity','0.91') };
 eval { $v .= pmver('version','0.9901') };
 

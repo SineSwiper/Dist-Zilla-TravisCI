@@ -1,6 +1,6 @@
 package Dist::Zilla::Plugin::TravisYML;
 
-our $VERSION = '0.96'; # VERSION
+our $VERSION = '0.98'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
 use sanity;
@@ -25,7 +25,15 @@ around mvp_multivalue_args => sub {
    my ($orig, $self) = @_;
    
    my @start = $self->$orig;
-   return (@start, 'notify_email', 'notify_irc');
+   return (
+      @start, qw(notify_email notify_irc irc_template extra_env),
+      ### XXX: Yes, this ends up being 7*3*3=63 attributes, but such is the price of progress...
+      (
+         map { $_, $_.'_dzil', $_.'_build' }
+         map { $_, 'pre_'.$_, 'post_'.$_ }
+         @Dist::Zilla::Role::TravisYML::phases
+      ),
+   );
 };
 
 sub prune_files {
@@ -49,8 +57,8 @@ sub after_release {
 
 __PACKAGE__->meta->make_immutable;
 42;
- 
 
+__END__
 
 =pod
 
@@ -79,17 +87,17 @@ Dist::Zilla::Plugin::TravisYML - creates a .travis.yml file for Travis CI
     allow_dirty = dist.ini
     allow_dirty = README
     allow_dirty = .travis.yml
-    push_to = origin
+    push_to = origin master:master
     push_to = origin build/master:build/master
 
 =head1 DESCRIPTION
 
 This plugin creates a C<<< .travis.yml >>> file in your distro for CI smoke testing (or what we like
-to call "[chain smokingE<verbar>Dist::Zilla::App::Command::chainsmokeE<sol>CHAIN-SMOKING-]").  It will also
+to call L<"chain smoking"|Dist::Zilla::App::Command::chainsmoke/CHAIN SMOKING?>).  It will also
 (optionally) create a separate C<<< .travis.yml >>> file for your build directory after a release.
 
 Why two files?  Because chain smoking via DZIL will work a lot differently than a traditional 
-CE<lt>Makefile.PL; makeE<gt>.  This tests both your distribution repo environment as well as what a 
+C<<< Makefile.PL; make >>>.  This tests both your distribution repo environment as well as what a 
 CPAN user would see.
 
 Of course, you still need to turn on TravisCI and the remote still needs to be a GitHub repo
@@ -158,6 +166,26 @@ to these IRC serverE<sol>rooms
 The default is C<<< 0 >>>.  Please ask permission from the room channel operators before enabling
 bot notification.
 
+=head2 irc_template
+
+Only applies when IRC notification is on.  The default is:
+
+    %{branch}#%{build_number} by %{author}: %{message} (%{build_url})
+
+This option can be specified more than once for multiple lines.  See L<Travis-CI's IRC notification docs|http://about.travis-ci.org/docs/user/notifications/#IRC-notification>
+for a list of variables that can be used.
+
+=head2 perl_version
+
+This is a space-delimited option with a list of the perl versions to test against.  The default
+is all supported versions available within Travis.  You can restrict it down to only a few like
+this:
+
+    perl_version = 5.10 5.12
+
+Note that any custom settings here will prevent any newer versions from being auto-added (as this
+distro is updated).
+
 =head2 mvdt
 
 Turning this on enables L<Minimum Version Dependency Testing|Dist::Zilla::TravisCI::MVDT>.  This
@@ -171,6 +199,74 @@ doc first to get an idea of what you're diving into.
 
 This applies to both YML files.
 
+=head2 test_authordeps
+
+Controls whether author dependencies will be tested while DZIL chainsmoking.  This option
+is also directly linked to verbosity and parallelization of the author deps:
+
+=over
+
+=item *
+
+C<<< 0 >>> = No tests or verbosity, all files are downloadedE<sol>installed in parallel (10 processes at a time)
+
+=item *
+
+C<<< 1 >>> = Each module is downloaded one at a time, tested, and with verbosity turned on
+
+=back
+
+The default is C<<< 0 >>>.
+
+=head2 test_deps
+
+Just like C<<< test_authordeps >>>, but for the real deps that the module needs.  This also affects
+testing for build chainsmoking as well.
+
+The default is C<<< 1 >>>.
+
+=head2 Custom Commands
+
+For the most part, the default command sets for TravisYML serves its purpose.  However, you may
+have some unusual situation from within your distro that demands a custom command or two.  For
+that purpose, there is a set of "dynamic" options available to add or replace any part of the
+command list for Travis.
+
+They are in the form of:
+
+    $pos$phase$filetype
+ 
+    $pos      = Either 'pre_' or 'post_' (optional)
+    $phase    = One of the Travis-CI testing phases (required)
+    $filetype = Either '_dzil' or '_build' (optional)
+
+See L<Travis-CI's Build Lifecycle|http://about.travis-ci.org/docs/user/build-configuration/#Build-Lifecycle>
+for a list of phases.
+
+The positions determine if the commands are to be added at the beginning (C<<< pre_ >>>), the end (C<<< post_ >>>), or
+replacing (no prefix) the existing code.  Replace entire blocks at your own risk; TravisYML may change
+the blocks for bug fixes or new features.
+
+The file type determines if these command changes are for the DZIL YML file (C<<< _dzil >>>), the build YML file
+(C<<< _build >>>), or both (no suffix).
+
+For example, this would give you the following combinations for the 'before_install' phase:
+
+    before_install            = Replace all before_install blocks
+    pre_before_install        = Unshift lines to all before_install blocks
+    post_before_install       = Push lines to all before_install blocks
+    before_install_dzil       = Replace DZIL before_install block
+    pre_before_install_dzil   = Unshift lines to DZIL before_install block
+    post_before_install_dzil  = Push lines to DZIL before_install block
+    before_install_build      = Replace build before_install block
+    pre_before_install_build  = Unshift lines to build before_install block
+    post_before_install_build = Push lines to build before_install block
+
+These options are all multi-lined, so you can add as many commands as you need:
+
+    pre_install_dzil = export AUTHOR_TESTING=1
+    pre_install_dzil = echo "Author testing is now "$AUTHOR_TESTING
+
 =head1 AVAILABILITY
 
 The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
@@ -181,7 +277,21 @@ site near you, or see L<https://metacpan.org/module/Dist::Zilla::TravisCI/>.
 
 =head1 AUTHOR
 
-Brendan Byrd <BBYRD@CPAN.org>
+Brendan Byrd <bbyrd@cpan.org>
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Graham Knop <haarg@haarg.org>
+
+=item *
+
+Torsten Raudssus <torsten@raudss.us>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -192,7 +302,3 @@ This is free software, licensed under:
   The Artistic License 2.0 (GPL Compatible)
 
 =cut
-
-
-__END__
-

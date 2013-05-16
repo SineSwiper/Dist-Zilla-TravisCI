@@ -5,8 +5,11 @@ MANIFEST
 META.json
 META.yml
 Makefile.PL
+README
 README.html
-README.pod
+corpus/dist/README
+corpus/dist/dist.ini
+corpus/dist/lib/DZPA/Main.pm
 dist.ini
 lib/Dist/Zilla/App/Command/chainsmoke.pm
 lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm
@@ -16,9 +19,8 @@ lib/Dist/Zilla/TravisCI.pod
 lib/Dist/Zilla/TravisCI/MVDT.pod
 t/00-check-deps.t
 t/00-compile.t
-t/00-load.t
 t/000-report-versions-tiny.t
-weaver.ini
+t/01-basic.t
 xt/author/test-eol.t
 xt/release/check-manifest.t
 xt/release/dist-manifest.t

@@ -1,4 +1,4 @@
-use Test::More 0.88;
+use Test::More 0.94;
 use Test::CheckDeps;
 
 check_dependencies();

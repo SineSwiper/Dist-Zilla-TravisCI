@@ -1,6 +1,6 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
-our $VERSION = '0.96'; # VERSION
+our $VERSION = '0.98'; # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
 use sanity;
@@ -165,8 +165,8 @@ sub prebuild {
 }
 
 42;
- 
 
+__END__
 
 =pod
 
@@ -186,7 +186,21 @@ site near you, or see L<https://metacpan.org/module/Dist::Zilla::TravisCI/>.
 
 =head1 AUTHOR
 
-Brendan Byrd <BBYRD@CPAN.org>
+Brendan Byrd <bbyrd@cpan.org>
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Graham Knop <haarg@haarg.org>
+
+=item *
+
+Torsten Raudssus <torsten@raudss.us>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -197,6 +211,3 @@ This is free software, licensed under:
   The Artistic License 2.0 (GPL Compatible)
 
 =cut
-
-
-__END__

@@ -1,8 +1,8 @@
 # PODNAME: Dist::Zilla::TravisCI
 # ABSTRACT: Travis CI plugins for your DZIL-based distribution
 
-
 __END__
+
 =pod
 
 =encoding utf-8
@@ -15,6 +15,7 @@ Dist::Zilla::TravisCI - Travis CI plugins for your DZIL-based distribution
 
     [@Prereqs]
     [TravisYML]
+ 
     [Git::CommitBuild]
     release_branch  = build/%b
     release_message = Release build of v%v (on %b)
@@ -92,7 +93,7 @@ Development releases on CPAN also work, but you have no idea what is on those CP
 Does it cover the full gamut of Perl versions, or are they just grabbing the latest?  Are they all 
 using the latest module dependencies (which may not be want you want)?
 
-You have more control over your Travis CI platform, so you can set up the environment they way you want
+You have more control over your Travis CI platform, so you can set up the environment the way you want
 it.  That's not to say that the massive CPAN tester army isn't a great boon for Perl, but in the fight
 against bugs, you want every weapon available.
 
@@ -108,7 +109,7 @@ L<Sign into Travis CI|http://travis-ci.org/users/auth/github> with your GitHub a
 
 =item 2.
 
-Flip a bit on your distro.
+Flip a bit on your distro through the L<profile page|https://travis-ci.org/profile>.
 
 =item 3.
 
@@ -132,13 +133,7 @@ L<Please donate!|https://love.travis-ci.org/>
 
 =item *
 
-B<MVDT> - Yes, I actually need to finish MVDT on my own distros.  I have an excuse, though: I need this
-in CPAN in order for Travis to download it.  Hopefully, I can get this finished soon now...
-
-=item *
-
-B<Tests> - This has actually been well-tested via other modules, but I still need to add in a test
-platform here.  Kinda sad, actually...
+B<MVDT> - Yes, I actually need to finish MVDT on my own distros.
 
 =back
 
@@ -167,7 +162,7 @@ those networks/channels and get help:
 
 irc.perl.org
 
-You can connect to the server at 'irc.perl.org' and join this channel: #distzilla then talk to this person for help: SineSwiper.
+You can connect to the server at 'irc.perl.org' and talk to this person for help: SineSwiper.
 
 =back
 
@@ -177,7 +172,21 @@ Please report any bugs or feature requests via L<https://github.com/SineSwiper/D
 
 =head1 AUTHOR
 
-Brendan Byrd <BBYRD@CPAN.org>
+Brendan Byrd <bbyrd@cpan.org>
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Graham Knop <haarg@haarg.org>
+
+=item *
+
+Torsten Raudssus <torsten@raudss.us>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -188,4 +197,3 @@ This is free software, licensed under:
   The Artistic License 2.0 (GPL Compatible)
 
 =cut
-
