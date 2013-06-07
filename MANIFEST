@@ -1,3 +1,4 @@
+.travis.yml
 CHANGES
 INSTALL
 LICENSE
@@ -19,7 +20,7 @@ lib/Dist/Zilla/TravisCI.pod
 lib/Dist/Zilla/TravisCI/MVDT.pod
 t/00-check-deps.t
 t/00-compile.t
-t/000-report-versions-tiny.t
+t/00-report-prereqs.t
 t/01-basic.t
 xt/author/test-eol.t
 xt/release/check-manifest.t

@@ -1,6 +1,6 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '0.98'; # VERSION
+our $VERSION = '0.98_02'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
 use sanity;
@@ -224,7 +224,10 @@ sub build_travis_yml {
    my $node = YAML::Bless(\%travis_yml);
    $node->keys([grep { exists $travis_yml{$_} } @yml_order]);
    $self->log( "Rebuilding .travis.yml".($is_build_branch ? ' (in build dir)' : '') );
-   DumpFile(Path::Class::File->new($self->zilla->built_in, '.travis.yml')->stringify, \%travis_yml);
+   
+   my $file = Path::Class::File->new($self->zilla->built_in, '.travis.yml');
+   DumpFile($file->stringify, \%travis_yml);
+   return $file;
 }
 
 sub _as_lucene_query {

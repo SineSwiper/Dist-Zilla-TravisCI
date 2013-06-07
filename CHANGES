@@ -1,8 +1,24 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v0.98_02 2013-06-07
+-------------------
+
+commit 8bb8bce9eea1a2ab4baceb4111aeee0a36c1207d
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Fri Jun 7 07:50:46 2013 -0400
+
+    Fix problem with build-branch .travis.yml not getting properly
+       added if only release_branch is turned on in Git::CommitBuild
+
 v0.98 2013-05-16
 ----------------
+
+commit ee602b6dc4ee944eb8a779ed2070158fa33de103
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Thu May 16 19:05:00 2013 -0400
+
+    Release v0.98
 
 commit 386ec487c10a73cf56e0e624faae02b1b71a7814
 Author: Brendan Byrd <Perl@ResonatorSoft.org>

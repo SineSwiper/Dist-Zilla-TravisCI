@@ -24,8 +24,7 @@
    "prereqs" : {
       "develop" : {
          "requires" : {
-            "Test::Pod" : "1.41",
-            "version" : "0.9901"
+            "Test::Pod" : "1.41"
          }
       },
       "runtime" : {
@@ -64,22 +63,22 @@
    "provides" : {
       "Dist::Zilla::App::Command::chainsmoke" : {
          "file" : "lib/Dist/Zilla/App/Command/chainsmoke.pm",
-         "version" : "0.98"
+         "version" : "0.98_02"
       },
       "Dist::Zilla::App::CommandHelper::ChainSmoking" : {
          "file" : "lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm",
-         "version" : "0.98"
+         "version" : "0.98_02"
       },
       "Dist::Zilla::Plugin::TravisYML" : {
          "file" : "lib/Dist/Zilla/Plugin/TravisYML.pm",
-         "version" : "0.98"
+         "version" : "0.98_02"
       },
       "Dist::Zilla::Role::TravisYML" : {
          "file" : "lib/Dist/Zilla/Role/TravisYML.pm",
-         "version" : "0.98"
+         "version" : "0.98_02"
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues"
@@ -92,7 +91,7 @@
       },
       "x_irc" : "irc://irc.perl.org/#distzilla"
    },
-   "version" : "0.98",
+   "version" : "0.98_02",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.014002"
@@ -161,17 +160,17 @@
          {
             "class" : "Dist::Zilla::Plugin::ReadmeAnyFromPod",
             "name" : "@Filter/ReadmePodInRoot",
-            "version" : "0.120120"
+            "version" : "0.131500"
          },
          {
             "class" : "Dist::Zilla::Plugin::ReadmeAnyFromPod",
             "name" : "@Filter/ReadmeTextInBuild",
-            "version" : "0.120120"
+            "version" : "0.131500"
          },
          {
             "class" : "Dist::Zilla::Plugin::ReadmeAnyFromPod",
             "name" : "@Filter/ReadmeHTMLInBuild",
-            "version" : "0.120120"
+            "version" : "0.131500"
          },
          {
             "class" : "Dist::Zilla::Plugin::InstallGuide",
@@ -226,7 +225,12 @@
          {
             "class" : "Dist::Zilla::Plugin::Test::MinimumVersion",
             "name" : "@Filter/Test::MinimumVersion",
-            "version" : "2.000004"
+            "version" : "2.000005"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::Test::ReportPrereqs",
+            "name" : "@Filter/Test::ReportPrereqs",
+            "version" : "0.006"
          },
          {
             "class" : "Dist::Zilla::Plugin::Test::CheckManifest",
@@ -242,11 +246,6 @@
             "class" : "Dist::Zilla::Plugin::Test::Version",
             "name" : "@Filter/Test::Version",
             "version" : "0.002004"
-         },
-         {
-            "class" : "Dist::Zilla::Plugin::ReportVersions::Tiny",
-            "name" : "@Filter/ReportVersions::Tiny",
-            "version" : "1.08"
          },
          {
             "class" : "Dist::Zilla::Plugin::AutoPrereqs",
@@ -271,7 +270,7 @@
          {
             "class" : "Dist::Zilla::Plugin::CheckPrereqsIndexed",
             "name" : "@Filter/CheckPrereqsIndexed",
-            "version" : "0.008"
+            "version" : "0.009"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaConfig",
@@ -316,7 +315,7 @@
          {
             "class" : "Dist::Zilla::Plugin::TravisYML",
             "name" : "@Filter/TravisYML",
-            "version" : "0.97"
+            "version" : "0.99"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch",
