@@ -19,6 +19,8 @@ use List::AllUtils 'first';
 with 'Dist::Zilla::Role::FilePruner';
 with 'Dist::Zilla::Role::InstallTool';
 with 'Dist::Zilla::Role::AfterRelease';
+
+with 'Dist::Zilla::Role::FileInjector';
 with 'Dist::Zilla::Role::TravisYML';
 
 around mvp_multivalue_args => sub {
@@ -52,7 +54,19 @@ sub setup_installer {
 
 sub after_release {
    my $self = shift;
-   $self->build_travis_yml(1) if $self->build_branch;
+   return unless $self->build_branch;
+   my $file = $self->build_travis_yml(1) || return;
+   
+   # Now we have to add the file back in
+   $self->add_file(
+      # Since we put the file in the build directory, we have to use InMemory to
+      # prevent the file paths from getting mismatched with what is in zilla->files
+      Dist::Zilla::File::InMemory->new({
+         name    => '.travis.yml',
+         content => $file->slurp,
+         mode    => $file->stat->mode & 0755, # kill world-writeability
+      })
+   );
 }
 
 __PACKAGE__->meta->make_immutable;
