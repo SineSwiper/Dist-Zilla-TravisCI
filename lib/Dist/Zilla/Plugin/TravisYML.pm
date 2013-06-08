@@ -25,7 +25,7 @@ with 'Dist::Zilla::Role::TravisYML';
 
 around mvp_multivalue_args => sub {
    my ($orig, $self) = @_;
-   
+
    my @start = $self->$orig;
    return (
       @start, qw(notify_email notify_irc irc_template extra_env),
@@ -56,7 +56,7 @@ sub after_release {
    my $self = shift;
    return unless $self->build_branch;
    my $file = $self->build_travis_yml(1) || return;
-   
+
    # Now we have to add the file back in
    $self->add_file(
       # Since we put the file in the build directory, we have to use InMemory to
@@ -71,20 +71,20 @@ sub after_release {
 
 __PACKAGE__->meta->make_immutable;
 42;
- 
+
 __END__
 
 =begin wikidoc
 
 = SYNOPSIS
- 
+
    [TravisYML]
    ; defaults
    build_branch = /^build\/.*/
    notify_email = 1
    notify_irc   = 0
    mvdt         = 0
-   
+
    ; These options are probably a good idea
    ; if you are going to use a build_branch
    [Git::CommitBuild]
@@ -99,15 +99,15 @@ __END__
    push_to = origin build/master:build/master
 
 = DESCRIPTION
- 
+
 This plugin creates a {.travis.yml} file in your distro for CI smoke testing (or what we like
 to call ["chain smoking"|Dist::Zilla::App::Command::chainsmoke/CHAIN SMOKING?]).  It will also
 (optionally) create a separate {.travis.yml} file for your build directory after a release.
 
-Why two files?  Because chain smoking via DZIL will work a lot differently than a traditional 
-{Makefile.PL; make}.  This tests both your distribution repo environment as well as what a 
+Why two files?  Because chain smoking via DZIL will work a lot differently than a traditional
+{Makefile.PL; make}.  This tests both your distribution repo environment as well as what a
 CPAN user would see.
- 
+
 Of course, you still need to turn on TravisCI and the remote still needs to be a GitHub repo
 for any of this to work.
 
@@ -120,7 +120,7 @@ Travis CI, per the [configuration|http://about.travis-ci.org/docs/user/build-con
 branch whitelist option.  The value will be inserted directly as an {only} clause.  The default
 is {/^build\/.*/}.
 
-This more or less requires [Git::CommitBuild|Dist::Zilla::Plugin::Git::CommitBuild] to work.  
+This more or less requires [Git::CommitBuild|Dist::Zilla::Plugin::Git::CommitBuild] to work.
 (Ordering is important, too.  TravisYML comes before Git::CommitBuild.)  You should change
 this to match up with the {release_branch} option, if your build branch is not going to reside
 in a {build/*} structure.
@@ -155,7 +155,7 @@ bot notification.
 Only applies when IRC notification is on.  The default is:
 
    %{branch}#%{build_number} by %{author}: %{message} (%{build_url})
-   
+
 This option can be specified more than once for multiple lines.  See [Travis-CI's IRC notification docs|http://about.travis-ci.org/docs/user/notifications/#IRC-notification]
 for a list of variables that can be used.
 
@@ -177,9 +177,9 @@ will make your YML file less of a static file, as it will now include commands t
 *downgrade* your dependencies to the lowest version that your prereqs said they would be able
 to use.
 
-While going through the MVDT process is recommended, it can be a royal pain-in-the-ass
-sometimes, so this option isn't on by default.  It's HIGHLY recommended that you read the above
-doc first to get an idea of what you're diving into.
+While going through the MVDT process is recommended, it can be a royal PITA sometimes, so this
+option isn't on by default.  It's HIGHLY recommended that you read the above doc first to get an
+idea of what you're diving into.
 
 This applies to both YML files.
 
@@ -210,11 +210,11 @@ command list for Travis.
 They are in the form of:
 
    $pos$phase$filetype
-   
+
    $pos      = Either 'pre_' or 'post_' (optional)
    $phase    = One of the Travis-CI testing phases (required)
    $filetype = Either '_dzil' or '_build' (optional)
-   
+
 See [Travis-CI's Build Lifecycle|http://about.travis-ci.org/docs/user/build-configuration/#Build-Lifecycle]
 for a list of phases.
 
@@ -241,3 +241,25 @@ These options are all multi-lined, so you can add as many commands as you need:
 
    pre_install_dzil = export AUTHOR_TESTING=1
    pre_install_dzil = echo "Author testing is now "$AUTHOR_TESTING
+
+= WHY USE THIS?
+
+A common question I get with this plugin is: ~"If .travis.yml is a static file, why bother with a plugin?"~
+
+Three reasons:
+
+1. *DZIL and Travis-CI interactions* - If you look at the YML file itself, you'll notice that it's not a 5-line
+file.  It's not as simple as telling Travis that this is a Perl distro and GO.  Both Travis-CI and DZIL are
+ever changing platforms, and this plugin will keep things in sync with those two platforms.  (For example,
+Travis VMs recently stopped using a valid name/email for git's user.* config items, which impacted DZIL smoking
+with certain Git plugins.  So, TravisYML had to compensate.)  I personally use this plugin myself, so if there
+are new issues that come up, I should be one of the first to notice.
+
+2. *Build branches* - Build branches are great for having a perfect copy of your current release, giving non-DZIL
+folks a chance to submit patches, and for running a Travis-CI test on something that is close to the CPAN
+release as possible.  However, setting that up can be tricky, and it requires a second YML file just for the build
+branch.  TravisYML manages that by hiding the DZIL {.travis.yml} file prior to building, and then creating a new
+one after release (but before the build branch is commited).
+
+3. *MVDT* - If you want to brave through the [Minimum Version Dependency Testing|Dist::Zilla::TravisCI::MVDT]
+process, this will automate the YML generation for you.
