@@ -1,6 +1,6 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '0.98_02'; # VERSION
+our $VERSION = '1.01'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
 use sanity;
@@ -154,12 +154,12 @@ sub build_travis_yml {
          'export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       );
    }
-   
+
    unless ($is_build_branch) {
       # verbosity/testing and parallelized installs don't mix
       my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied';
       my $test_cmd   = 'cpanm --verbose --skip-satisfied';
-      
+
       $travis_yml{before_install} = [
          $env_exports,
          # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
@@ -192,7 +192,7 @@ sub build_travis_yml {
    }
 
    ### See if any custom code is requested
-   
+
    my $ft_suffix = $is_build_branch ? '_build' : '_dzil';
    foreach my $phase (@phases) {
       # First, replace any new blocks, then deal with pre/post blocks
@@ -201,12 +201,12 @@ sub build_travis_yml {
          my $custom_cmds = $self->$method;
          $travis_yml{$phase} = [ @$custom_cmds ] if ($custom_cmds && @$custom_cmds);
       }
-      
+
       foreach my $ft ('', $ft_suffix) {
          foreach my $pos (qw(pre post)) {
             my $method = $pos.'_'.$phase.$ft;
             my $custom_cmds = $self->$method;
-            
+
             if ($custom_cmds && @$custom_cmds) {
                $pos eq 'pre' ?
                   unshift(@{$travis_yml{$phase}}, @$custom_cmds) :
@@ -216,7 +216,7 @@ sub build_travis_yml {
          }
       }
    }
-   
+
    ### Dump YML (in order)
    local $YAML::Indent    = 3;
    local $YAML::UseHeader = 0;
@@ -224,7 +224,7 @@ sub build_travis_yml {
    my $node = YAML::Bless(\%travis_yml);
    $node->keys([grep { exists $travis_yml{$_} } @yml_order]);
    $self->log( "Rebuilding .travis.yml".($is_build_branch ? ' (in build dir)' : '') );
-   
+
    my $file = Path::Class::File->new($self->zilla->built_in, '.travis.yml');
    DumpFile($file->stringify, \%travis_yml);
    return $file;

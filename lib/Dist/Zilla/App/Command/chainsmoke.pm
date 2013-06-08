@@ -1,6 +1,6 @@
 package Dist::Zilla::App::Command::chainsmoke;
 
-our $VERSION = '0.98_02'; # VERSION
+our $VERSION = '1.01'; # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 
 use sanity;

@@ -31,7 +31,7 @@ modern module?  No, probably not.  But, that's exactly what your prereqs said, i
 Moose and didn't tie a version number to the C<<< use >>> command.
 
 And if the prereqs are inaccurate, you're going to get bug reports that your module doesn't
-work because of some weird error.  And it's likely going to take a lot of debugging before 
+work because of some weird error.  And it's likely going to take a lot of debugging before
 you figure out that the user should upgrade module X.
 
 =head2 Why test the lowest version?  Nobody's going to have that!
@@ -43,7 +43,7 @@ won't.
 
 Some may have modules that are 2-5+ years old, since it came with Perl core, or came with
 the operating system's package of Perl (or some other module), or came as a dependency for
-some module they grabbed from CPAN several years ago.  You can't tell.  The only thing we 
+some module they grabbed from CPAN several years ago.  You can't tell.  The only thing we
 can tell is what the prereqs recommend.
 
 =head2 Why not just use LatestPrereqs?
@@ -67,8 +67,8 @@ because of the way they use "throwaway VMs" and Perlbrew.
 
 =head2 Okay, I'm sold.  What am I getting into?
 
-Well, a lot, actually.  I won't lie; MVDT can be a royal pain-in-the-ass.  You will be going 
-through a lot of cycles like this:
+Well, a lot, actually.  I won't lie; MVDT can be a royal PITA.  You will be going through
+a lot of cycles like this:
 
     * Start a chainsmoke
     * Wait for TravisCI to start and finish your testing
@@ -144,7 +144,7 @@ complain.  If you don't recognize the module as a prereq of yours, you may want 
 your tests with L<Devel::SimpleTrace> or similiar to ensure that the failures give you a
 full path.  Something in that path has to be the module failure point.
 
-Now, you'll need a better version to use.  Check L<BackPAN|http://backpan.perl.org/> and 
+Now, you'll need a better version to use.  Check L<BackPAN|http://backpan.perl.org/> and
 L<MetaCPAN|http://metacpan.org/>.  If you're lucky, the module doesn't have that many versions
 and you can just try the next one up.  If not, there are some ways of figure out where to
 go next:

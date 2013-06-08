@@ -1,6 +1,6 @@
 package Dist::Zilla::Plugin::TravisYML;
 
-our $VERSION = '0.98_02'; # VERSION
+our $VERSION = '1.01'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
 use sanity;
@@ -25,7 +25,7 @@ with 'Dist::Zilla::Role::TravisYML';
 
 around mvp_multivalue_args => sub {
    my ($orig, $self) = @_;
-   
+
    my @start = $self->$orig;
    return (
       @start, qw(notify_email notify_irc irc_template extra_env),
@@ -56,14 +56,14 @@ sub after_release {
    my $self = shift;
    return unless $self->build_branch;
    my $file = $self->build_travis_yml(1) || return;
-   
+
    # Now we have to add the file back in
    $self->add_file(
       # Since we put the file in the build directory, we have to use InMemory to
       # prevent the file paths from getting mismatched with what is in zilla->files
-      Dist::Zilla::File::InMemory->new({
+      Dist::Zilla::File::InMemory->new(Dwarn {
          name    => '.travis.yml',
-         content => $file->slurp,
+         content => scalar $file->slurp,
          mode    => $file->stat->mode & 0755, # kill world-writeability
       })
    );
@@ -110,8 +110,8 @@ This plugin creates a C<<< .travis.yml >>> file in your distro for CI smoke test
 to call L<"chain smoking"|Dist::Zilla::App::Command::chainsmoke/CHAIN SMOKING?>).  It will also
 (optionally) create a separate C<<< .travis.yml >>> file for your build directory after a release.
 
-Why two files?  Because chain smoking via DZIL will work a lot differently than a traditional 
-C<<< Makefile.PL; make >>>.  This tests both your distribution repo environment as well as what a 
+Why two files?  Because chain smoking via DZIL will work a lot differently than a traditional
+C<<< Makefile.PL; make >>>.  This tests both your distribution repo environment as well as what a
 CPAN user would see.
 
 Of course, you still need to turn on TravisCI and the remote still needs to be a GitHub repo
@@ -126,7 +126,7 @@ Travis CI, per the L<configuration|http://about.travis-ci.org/docs/user/build-co
 branch whitelist option.  The value will be inserted directly as an C<<< only >>> clause.  The default
 is C<<< /^build\/.*/ >>>.
 
-This more or less requires L<Git::CommitBuild|Dist::Zilla::Plugin::Git::CommitBuild> to work.  
+This more or less requires L<Git::CommitBuild|Dist::Zilla::Plugin::Git::CommitBuild> to work.
 (Ordering is important, too.  TravisYML comes before Git::CommitBuild.)  You should change
 this to match up with the C<<< release_branch >>> option, if your build branch is not going to reside
 in a C<<< build/* >>> structure.
@@ -207,9 +207,9 @@ will make your YML file less of a static file, as it will now include commands t
 B<downgrade> your dependencies to the lowest version that your prereqs said they would be able
 to use.
 
-While going through the MVDT process is recommended, it can be a royal pain-in-the-ass
-sometimes, so this option isn't on by default.  It's HIGHLY recommended that you read the above
-doc first to get an idea of what you're diving into.
+While going through the MVDT process is recommended, it can be a royal PITA sometimes, so this
+option isn't on by default.  It's HIGHLY recommended that you read the above doc first to get an
+idea of what you're diving into.
 
 This applies to both YML files.
 
@@ -280,6 +280,28 @@ These options are all multi-lined, so you can add as many commands as you need:
 
     pre_install_dzil = export AUTHOR_TESTING=1
     pre_install_dzil = echo "Author testing is now "$AUTHOR_TESTING
+
+=head1 WHY USE THIS?
+
+A common question I get with this plugin is: I<"If .travis.yml is a static file, why bother with a plugin?">
+
+Three reasons:
+
+1. B<DZIL and Travis-CI interactions> - If you look at the YML file itself, you'll notice that it's not a 5-line
+file.  It's not as simple as telling Travis that this is a Perl distro and GO.  Both Travis-CI and DZIL are
+ever changing platforms, and this plugin will keep things in sync with those two platforms.  (For example,
+Travis VMs recently stopped using a valid nameE<sol>email for git's user.* config items, which impacted DZIL smoking
+with certain Git plugins.  So, TravisYML had to compensate.)  I personally use this plugin myself, so if there
+are new issues that come up, I should be one of the first to notice.
+
+2. B<Build branches> - Build branches are great for having a perfect copy of your current release, giving non-DZIL
+folks a chance to submit patches, and for running a Travis-CI test on something that is close to the CPAN
+release as possible.  However, setting that up can be tricky, and it requires a second YML file just for the build
+branch.  TravisYML manages that by hiding the DZIL C<<< .travis.yml >>> file prior to building, and then creating a new
+one after release (but before the build branch is commited).
+
+3. B<MVDT> - If you want to brave through the L<Minimum Version Dependency Testing|Dist::Zilla::TravisCI::MVDT>
+process, this will automate the YML generation for you.
 
 =head1 AVAILABILITY
 

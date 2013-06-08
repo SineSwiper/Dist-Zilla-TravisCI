@@ -63,22 +63,22 @@
    "provides" : {
       "Dist::Zilla::App::Command::chainsmoke" : {
          "file" : "lib/Dist/Zilla/App/Command/chainsmoke.pm",
-         "version" : "0.98_02"
+         "version" : "1.01"
       },
       "Dist::Zilla::App::CommandHelper::ChainSmoking" : {
          "file" : "lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm",
-         "version" : "0.98_02"
+         "version" : "1.01"
       },
       "Dist::Zilla::Plugin::TravisYML" : {
          "file" : "lib/Dist/Zilla/Plugin/TravisYML.pm",
-         "version" : "0.98_02"
+         "version" : "1.01"
       },
       "Dist::Zilla::Role::TravisYML" : {
          "file" : "lib/Dist/Zilla/Role/TravisYML.pm",
-         "version" : "0.98_02"
+         "version" : "1.01"
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues"
@@ -91,7 +91,7 @@
       },
       "x_irc" : "irc://irc.perl.org/#distzilla"
    },
-   "version" : "0.98_02",
+   "version" : "1.01",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.014002"
@@ -315,7 +315,7 @@
          {
             "class" : "Dist::Zilla::Plugin::TravisYML",
             "name" : "@Filter/TravisYML",
-            "version" : "0.99"
+            "version" : "0.98_02"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch",
