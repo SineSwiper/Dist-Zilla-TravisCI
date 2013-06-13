@@ -1,6 +1,6 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
-our $VERSION = '1.01'; # VERSION
+our $VERSION = '1.02'; # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
 use sanity;

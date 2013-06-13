@@ -1,6 +1,15 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v1.02 2013-06-13
+----------------
+
+commit 71ff4b1ae9ffc4bd916d50c5151c6075b83aa96b
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Thu Jun 13 09:26:30 2013 -0400
+
+    Remove Dwarn debug from Plugin (no idea how that passed tests...)
+
 v1.01 2013-06-07
 ----------------
 
