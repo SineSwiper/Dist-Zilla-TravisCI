@@ -1,11 +1,11 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '1.02'; # VERSION
+our $VERSION = '1.03'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
+use Moose::Role;
 use sanity;
 
-use Moose::Role;
 use MooseX::Has::Sugar;
 use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
@@ -62,7 +62,7 @@ has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
 ] } );
 
-has perl_version  => ( rw, isa => Str, default => '5.16 5.14 5.12 5.10' );
+has perl_version  => ( rw, isa => Str, default => '5.19 5.18 5.16 5.14 5.12 5.10 5.8' );
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;
@@ -382,20 +382,6 @@ site near you, or see L<https://metacpan.org/module/Dist::Zilla::TravisCI/>.
 =head1 AUTHOR
 
 Brendan Byrd <bbyrd@cpan.org>
-
-=head1 CONTRIBUTORS
-
-=over 4
-
-=item *
-
-Graham Knop <haarg@haarg.org>
-
-=item *
-
-Torsten Raudssus <torsten@raudss.us>
-
-=back
 
 =head1 COPYRIGHT AND LICENSE
 

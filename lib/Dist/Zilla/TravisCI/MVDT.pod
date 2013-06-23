@@ -201,20 +201,6 @@ site near you, or see L<https://metacpan.org/module/Dist::Zilla::TravisCI/>.
 
 Brendan Byrd <bbyrd@cpan.org>
 
-=head1 CONTRIBUTORS
-
-=over 4
-
-=item *
-
-Graham Knop <haarg@haarg.org>
-
-=item *
-
-Torsten Raudssus <torsten@raudss.us>
-
-=back
-
 =head1 COPYRIGHT AND LICENSE
 
 This software is Copyright (c) 2013 by Brendan Byrd.

@@ -86,7 +86,7 @@ test_travis_yml(
 test_travis_yml(
    {},
    'perl',
-   [ qw(5.16 5.14 5.12 5.10) ],
+   [ qw(5.19 5.18 5.16 5.14 5.12 5.10 5.8) ],
 );
 test_travis_yml(
    { perl_version => '5.10    5.12'},

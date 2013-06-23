@@ -1,11 +1,10 @@
 package Dist::Zilla::Plugin::TravisYML;
 
-our $VERSION = '1.02'; # VERSION
+our $VERSION = '1.03'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
-use sanity;
-
 use Moose;
+use sanity;
 
 use Dist::Zilla::File::InMemory;
 use List::AllUtils 'first';
@@ -314,20 +313,6 @@ site near you, or see L<https://metacpan.org/module/Dist::Zilla::TravisCI/>.
 =head1 AUTHOR
 
 Brendan Byrd <bbyrd@cpan.org>
-
-=head1 CONTRIBUTORS
-
-=over 4
-
-=item *
-
-Graham Knop <haarg@haarg.org>
-
-=item *
-
-Torsten Raudssus <torsten@raudss.us>
-
-=back
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -9,7 +9,7 @@ build_requires:
   Test::More: 0.94
   Test::Most: 0.01
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300034, CPAN::Meta::Converter version 2.130880'
+generated_by: 'Dist::Zilla version 4.300035, CPAN::Meta::Converter version 2.130880'
 license: artistic_2
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -24,16 +24,16 @@ no_index:
 provides:
   Dist::Zilla::App::Command::chainsmoke:
     file: lib/Dist/Zilla/App/Command/chainsmoke.pm
-    version: 1.02
+    version: 1.03
   Dist::Zilla::App::CommandHelper::ChainSmoking:
     file: lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm
-    version: 1.02
+    version: 1.03
   Dist::Zilla::Plugin::TravisYML:
     file: lib/Dist/Zilla/Plugin/TravisYML.pm
-    version: 1.02
+    version: 1.03
   Dist::Zilla::Role::TravisYML:
     file: lib/Dist/Zilla/Role/TravisYML.pm
-    version: 1.02
+    version: 1.03
 requires:
   Dist::Zilla: 1.093220
   Dist::Zilla::Plugin::Git::Check: 1.093250
@@ -59,7 +59,7 @@ resources:
   bugtracker: https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues
   homepage: https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki
   repository: git://github.com/SineSwiper/Dist-Zilla-TravisCI.git
-version: 1.02
+version: 1.03
 x_Dist_Zilla:
   perl:
     version: 5.014002
@@ -71,11 +71,11 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MakeMaker
       name: '@Filter/MakeMaker'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::ModuleShareDirs
       name: '@Filter/ModuleShareDirs'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::Git::NextVersion
       name: '@Filter/Git::NextVersion'
@@ -95,7 +95,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::PruneCruft
       name: '@Filter/PruneCruft'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::GitFmtChanges
       name: '@Filter/GitFmtChanges'
@@ -103,15 +103,15 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::ManifestSkip
       name: '@Filter/ManifestSkip'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::Manifest
       name: '@Filter/Manifest'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::License
       name: '@Filter/License'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::ReadmeAnyFromPod
       name: '@Filter/ReadmePodInRoot'
@@ -131,7 +131,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::ExecDir
       name: '@Filter/ExecDir'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::Test::Compile
       name: '@Filter/Test::Compile'
@@ -139,7 +139,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::PodSyntaxTests
       name: '@Filter/PodSyntaxTests'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::RunExtraTests
       name: '@Filter/RunExtraTests'
@@ -187,7 +187,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::AutoPrereqs
       name: '@Filter/@Prereqs/AutoPrereqs'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::MinimumPerl
       name: '@Filter/@Prereqs/MinimumPerl'
@@ -207,19 +207,19 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MetaConfig
       name: '@Filter/MetaConfig'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::MetaJSON
       name: '@Filter/MetaJSON'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::MetaYAML
       name: '@Filter/MetaYAML'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::MetaNoIndex
       name: '@Filter/MetaNoIndex'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::MetaProvides::Package
       name: '@Filter/MetaProvides::Package'
@@ -239,7 +239,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::TravisYML
       name: '@Filter/TravisYML'
-      version: 1.02
+      version: 1.03
     -
       class: Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch
       name: '@Filter/Git::CheckFor::CorrectBranch'
@@ -271,15 +271,15 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::TestRelease
       name: '@Filter/TestRelease'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::ConfirmRelease
       name: '@Filter/ConfirmRelease'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::UploadToCPAN
       name: '@Filter/UploadToCPAN'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::InstallRelease
       name: '@Filter/InstallRelease'
@@ -291,32 +291,32 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':InstallModules'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':IncModules'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':TestFiles'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ExecFiles'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ShareFiles'
-      version: 4.300034
+      version: 4.300035
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':MainModule'
-      version: 4.300034
+      version: 4.300035
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:
       is_trial: 0
-    version: 4.300034
+    version: 4.300035
 x_contributors:
   - 'Graham Knop <haarg@haarg.org>'
   - 'Torsten Raudssus <torsten@raudss.us>'
