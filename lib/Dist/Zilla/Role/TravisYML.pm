@@ -62,7 +62,7 @@ has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
 ] } );
 
-has perl_version  => ( rw, isa => Str, default => '5.19 5.18 5.16 5.14 5.12 5.10 5.8' );
+has perl_version  => ( rw, isa => Str, default => '5.19 5.18 5.16 5.14 5.12 5.10' );
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;

@@ -161,8 +161,10 @@ for a list of variables that can be used.
 == perl_version
 
 This is a space-delimited option with a list of the perl versions to test against.  The default
-is all supported versions available within Travis.  You can restrict it down to only a few like
-this:
+is all supported versions available within Travis, except for Perl 5.8.  This is because there's
+still various DZIL plugins that require 5.10.  (This may change in the future.)
+
+You can restrict it down to only a few like this:
 
    perl_version = 5.10 5.12
 
@@ -219,7 +221,7 @@ for a list of phases.
 
 The positions determine if the commands are to be added at the beginning ({pre_}), the end ({post_}), or
 replacing (no prefix) the existing code.  Replace entire blocks at your own risk; TravisYML may change
-the blocks for bug fixes or new features.
+the original blocks for bug fixes or new features, and you wouldn't see them if they were replaced.
 
 The file type determines if these command changes are for the DZIL YML file ({_dzil}), the build YML file
 ({_build}), or both (no suffix).
