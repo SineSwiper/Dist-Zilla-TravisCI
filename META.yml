@@ -24,16 +24,16 @@ no_index:
 provides:
   Dist::Zilla::App::Command::chainsmoke:
     file: lib/Dist/Zilla/App/Command/chainsmoke.pm
-    version: 1.03
+    version: 1.04
   Dist::Zilla::App::CommandHelper::ChainSmoking:
     file: lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm
-    version: 1.03
+    version: 1.04
   Dist::Zilla::Plugin::TravisYML:
     file: lib/Dist/Zilla/Plugin/TravisYML.pm
-    version: 1.03
+    version: 1.04
   Dist::Zilla::Role::TravisYML:
     file: lib/Dist/Zilla/Role/TravisYML.pm
-    version: 1.03
+    version: 1.04
 requires:
   Dist::Zilla: 1.093220
   Dist::Zilla::Plugin::Git::Check: 1.093250
@@ -59,7 +59,7 @@ resources:
   bugtracker: https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues
   homepage: https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki
   repository: git://github.com/SineSwiper/Dist-Zilla-TravisCI.git
-version: 1.03
+version: 1.04
 x_Dist_Zilla:
   perl:
     version: 5.014002

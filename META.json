@@ -63,19 +63,19 @@
    "provides" : {
       "Dist::Zilla::App::Command::chainsmoke" : {
          "file" : "lib/Dist/Zilla/App/Command/chainsmoke.pm",
-         "version" : "1.03"
+         "version" : "1.04"
       },
       "Dist::Zilla::App::CommandHelper::ChainSmoking" : {
          "file" : "lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm",
-         "version" : "1.03"
+         "version" : "1.04"
       },
       "Dist::Zilla::Plugin::TravisYML" : {
          "file" : "lib/Dist/Zilla/Plugin/TravisYML.pm",
-         "version" : "1.03"
+         "version" : "1.04"
       },
       "Dist::Zilla::Role::TravisYML" : {
          "file" : "lib/Dist/Zilla/Role/TravisYML.pm",
-         "version" : "1.03"
+         "version" : "1.04"
       }
    },
    "release_status" : "stable",
@@ -91,7 +91,7 @@
       },
       "x_irc" : "irc://irc.perl.org/#distzilla"
    },
-   "version" : "1.03",
+   "version" : "1.04",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.014002"

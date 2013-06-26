@@ -1,8 +1,23 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v1.04 2013-06-25
+----------------
+
+commit f5dc49df8803dccdc9407dedcaa6399093fc372e
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Tue Jun 25 20:01:17 2013 -0400
+
+    Remove Perl 5.8 support (for now)
+
 v1.03 2013-06-22
 ----------------
+
+commit 2793e3cc62ce57b212e3d691525ca1f8425d6719
+Author: Brendan Byrd <Perl@ResonatorSoft.org>
+Date:   Sat Jun 22 22:35:24 2013 -0400
+
+    Release v1.03
 
 commit a425263a23f5d9feefd6d808f2b1a11ed017aa9e
 Author: Brendan Byrd <Perl@ResonatorSoft.org>
