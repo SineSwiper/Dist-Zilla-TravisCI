@@ -7,7 +7,7 @@ perl:
    - 5.12
    - 5.10
 before_install:
-   - export AUTOMATED_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1
+   - export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1
    - git config --global user.name "TravisCI"
    - git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"
 install:
@@ -16,3 +16,12 @@ install:
    - "dzil listdeps   | grep -vP '[^\\w:]' | cpanm --verbose --skip-satisfied"
 script:
    - dzil smoke --release --author
+notifications:
+   irc:
+      channels:
+         - irc.perl.org#sanity
+      on_failure: always
+      on_success: change
+      template:
+         - '%{branch}#%{build_number} by %{author}: %{message} (%{build_url})'
+      use_notice: true
