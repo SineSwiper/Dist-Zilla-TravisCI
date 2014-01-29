@@ -165,8 +165,8 @@ sub build_travis_yml {
 
    unless ($is_build_branch) {
       # verbosity/testing and parallelized installs don't mix
-      my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied';
-      my $test_cmd   = 'cpanm --verbose --skip-satisfied';
+      my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest';
+      my $test_cmd   = 'cpanm --verbose';
 
       $travis_yml{before_install} = [
          $env_exports,
@@ -176,8 +176,8 @@ sub build_travis_yml {
       ];
       $travis_yml{install} = scalar(@releases) ? \@releases_install : [
          "cpanm --quiet --notest --skip-satisfied Dist::Zilla",  # this should already exist anyway...
-         "dzil authordeps | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
-         "dzil listdeps   | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
+         "dzil authordeps --missing | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
+         "dzil listdeps   --missing | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
       ];
       $travis_yml{script} = [
          "dzil smoke --release --author"
@@ -190,7 +190,7 @@ sub build_travis_yml {
          'rm .travis.yml',
       ];
       $travis_yml{install} = scalar(@releases) ? \@releases_install : [
-         'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' --skip-satisfied .',
+         'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' .',
       ];
 
       $travis_yml{'branches'} = { only => $bbranch };
