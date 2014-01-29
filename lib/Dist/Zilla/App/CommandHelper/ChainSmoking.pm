@@ -96,7 +96,7 @@ sub chainsmoke {
       { message => '"Chain smoking for local branch '.$self->branch.'"' },
       '--allow-empty',  # because it might be ran multiple times without changes
    );
-   $self->log('Commited');
+   $self->log('Committed');
    
    $self->log_debug($_) for $self->git->push( $self->remote, 'HEAD:'.$self->_remote_branch );   
    $self->log('Pushed');
