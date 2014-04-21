@@ -1,6 +1,6 @@
 package Dist::Zilla::App::Command::chainsmoke;
 
-our $VERSION = '1.04'; # VERSION
+our $VERSION = '1.05'; # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 
 use sanity;
@@ -56,7 +56,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -118,7 +118,7 @@ polluting your local repo's master history.
 
 =head1 AVAILABILITY
 
-The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
+The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI>.
 
 The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
@@ -130,7 +130,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2013 by Brendan Byrd.
+This software is Copyright (c) 2014 by Brendan Byrd.
 
 This is free software, licensed under:
 

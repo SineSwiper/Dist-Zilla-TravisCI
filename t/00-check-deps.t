@@ -1,11 +1,17 @@
-use Test::More 0.94;
-use Test::CheckDeps;
+use strict;
+use warnings;
 
-check_dependencies();
+# this test was generated with Dist::Zilla::Plugin::Test::CheckDeps 0.012
+
+use Test::More 0.94;
+use Test::CheckDeps 0.010;
+
+
+check_dependencies('classic');
+
 
 if (0) {
     BAIL_OUT("Missing dependencies") if !Test::More->builder->is_passing;
 }
 
 done_testing;
-

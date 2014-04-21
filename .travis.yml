@@ -14,3 +14,12 @@ before_install:
    - rm .travis.yml
 install:
    - cpanm --installdeps --verbose  --skip-satisfied .
+notifications:
+   irc:
+      channels:
+         - irc.perl.org#sanity
+      on_failure: always
+      on_success: change
+      template:
+         - '%{branch}#%{build_number} by %{author}: %{message} (%{build_url})'
+      use_notice: true

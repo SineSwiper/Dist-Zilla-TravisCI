@@ -5,7 +5,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -139,7 +139,7 @@ B<MVDT> - Yes, I actually need to finish MVDT on my own distros.
 
 =head1 AVAILABILITY
 
-The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
+The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI>.
 
 The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
@@ -180,7 +180,15 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =item *
 
+Alex Peters <lxp@cpan.org>
+
+=item *
+
 Graham Knop <haarg@haarg.org>
+
+=item *
+
+Randy Stauner <randy@magnificent-tears.com>
 
 =item *
 
@@ -190,7 +198,7 @@ Torsten Raudssus <torsten@raudss.us>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2013 by Brendan Byrd.
+This software is Copyright (c) 2014 by Brendan Byrd.
 
 This is free software, licensed under:
 

@@ -1,6 +1,6 @@
 package Dist::Zilla::Plugin::TravisYML;
 
-our $VERSION = '1.04'; # VERSION
+our $VERSION = '1.05'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
 use Moose;
@@ -75,7 +75,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -306,7 +306,7 @@ process, this will automate the YML generation for you.
 
 =head1 AVAILABILITY
 
-The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
+The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI>.
 
 The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
@@ -318,7 +318,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2013 by Brendan Byrd.
+This software is Copyright (c) 2014 by Brendan Byrd.
 
 This is free software, licensed under:
 

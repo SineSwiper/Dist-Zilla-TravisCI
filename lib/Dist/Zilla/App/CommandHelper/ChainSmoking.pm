@@ -1,6 +1,6 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
-our $VERSION = '1.04'; # VERSION
+our $VERSION = '1.05'; # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
 use sanity;
@@ -30,6 +30,8 @@ has branch => ( isa => 'Str', is => 'ro', lazy => 1, default => sub {
 
 ### HACK: Needed for DirtyFiles, though this is really only used for Plugins ###
 sub mvp_multivalue_args { }
+### HACK: Ditto for ...::Git::Repo (expects 'Dist::Zilla::Role::ConfigDumper').
+sub dump_config { return {} }
 
 with 'Dist::Zilla::Role::Git::Repo';
 with 'Dist::Zilla::Role::Git::DirtyFiles';
@@ -96,7 +98,7 @@ sub chainsmoke {
       { message => '"Chain smoking for local branch '.$self->branch.'"' },
       '--allow-empty',  # because it might be ran multiple times without changes
    );
-   $self->log('Commited');
+   $self->log('Committed');
    
    $self->log_debug($_) for $self->git->push( $self->remote, 'HEAD:'.$self->_remote_branch );   
    $self->log('Pushed');
@@ -170,7 +172,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -178,7 +180,7 @@ Dist::Zilla::App::CommandHelper::ChainSmoking - Helper class for chainsmoke comm
 
 =head1 AVAILABILITY
 
-The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
+The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI>.
 
 The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
@@ -190,7 +192,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2013 by Brendan Byrd.
+This software is Copyright (c) 2014 by Brendan Byrd.
 
 This is free software, licensed under:
 

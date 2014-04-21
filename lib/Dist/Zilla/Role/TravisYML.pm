@@ -1,6 +1,6 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '1.04'; # VERSION
+our $VERSION = '1.05'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
 use Moose::Role;
@@ -68,7 +68,7 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;
 
    # Find the lowest required dependencies and tell Travis-CI to install them
-   my @releases;
+   my (%releases, %versions);
    if ($self->mvdt) {
       my $prereqs = $self->zilla->prereqs;
       $self->log("Searching for minimum dependency versions");
@@ -85,7 +85,7 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
             next if $module eq 'perl';  # obvious
 
             my $modver = $req->requirements_for_module($module);
-            my ($release, $minver) = $self->_mcpan_module_minrelease($module, $modver);
+            my ($distro, $release, $minver) = $self->_mcpan_module_minrelease($module, $modver);
             next unless $release;
             my $mod_in_perlver = Module::CoreList->first_release($module, $minver);
 
@@ -94,14 +94,21 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
                next;
             }
 
-            $self->log_debug(['Found minimum dep version for Module %s as %s', $module, $release]);
-            push @releases, $release;
+            # Only install the latest version, in cases of a conflict between phases
+            if (!$versions{$distro} || $minver > $versions{$distro}) {
+               $releases{$distro} = $release;
+               $versions{$distro} = $minver;
+               $self->log_debug(['Found minimum dep version for Module %s as %s', $module, $release]);
+            }
+            else {
+               $self->log_debug(['Module %s v%s has a higher version due to be installed in %s v%s', $module, $minver, $distro, ''.$versions{$distro}]);
+            }
          }
       }
       $self->logger->clear_prefix;
    }
 
-   return \@releases;
+   return [ map { $releases{$_} } sort keys %releases ];
 });
 
 sub build_travis_yml {
@@ -138,7 +145,7 @@ sub build_travis_yml {
 
    $travis_yml{'notifications'} = \%notifications if (%notifications);
 
-   my $env_exports = 'export AUTOMATED_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
+   my $env_exports = 'export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
 
    ### Prior to the custom mangling by the user, establish a default .travis.yml to work from
 
@@ -150,15 +157,16 @@ sub build_travis_yml {
          # Install the lowest possible required version for the dependencies
          'export OLD_CPANM_OPT=$PERL_CPANM_OPT',
          "export PERL_CPANM_OPT='--mirror http://cpan.metacpan.org/ --mirror http://search.cpan.org/CPAN' \$PERL_CPANM_OPT",
-         (map { 'cpanm --verbose '.$_ } @releases),
+         (map { 'cpanm --verbose '              .$_ } @releases),  # first pass to force minimum versions
+         (map { 'cpanm --verbose --installdeps '.$_ } @releases),  # second pass to make sure conflicting deps are handled correctly
          'export PERL_CPANM_OPT=$OLD_CPANM_OPT',
       );
    }
 
    unless ($is_build_branch) {
       # verbosity/testing and parallelized installs don't mix
-      my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest --skip-satisfied';
-      my $test_cmd   = 'cpanm --verbose --skip-satisfied';
+      my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest';
+      my $test_cmd   = 'cpanm --verbose';
 
       $travis_yml{before_install} = [
          $env_exports,
@@ -168,8 +176,8 @@ sub build_travis_yml {
       ];
       $travis_yml{install} = scalar(@releases) ? \@releases_install : [
          "cpanm --quiet --notest --skip-satisfied Dist::Zilla",  # this should already exist anyway...
-         "dzil authordeps | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
-         "dzil listdeps   | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
+         "dzil authordeps --missing | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
+         "dzil listdeps   --missing | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
       ];
       $travis_yml{script} = [
          "dzil smoke --release --author"
@@ -182,7 +190,7 @@ sub build_travis_yml {
          'rm .travis.yml',
       ];
       $travis_yml{install} = scalar(@releases) ? \@releases_install : [
-         'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' --skip-satisfied .',
+         'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' .',
       ];
 
       $travis_yml{'branches'} = { only => $bbranch };
@@ -300,7 +308,7 @@ sub _mcpan_module_minrelease {
    my $details = $self->mcpan->fetch("file/_search",
       q      => $q,
       sort   => 'module.version_numified',
-      fields => 'author,release,module.version,module.name',
+      fields => 'author,release,distribution,module.version,module.name',
       size   => $try_harder ? 20 : 1,
    );
    unless ($details && $details->{hits}{total}) {
@@ -308,15 +316,17 @@ sub _mcpan_module_minrelease {
       return undef;
    }
 
+   ### XXX: Figure out better ways to find these modules with multiple package names (ie: Moose::Autobox, EUMM)
+
    # Sometimes, MetaCPAN just gets highly confused...
    my @hits = @{ $details->{hits}{hits} };
    my $hit;
    my $is_bad = 1;
-   do {
+   while ($is_bad and @hits) {
       $hit = shift @hits;
       # (ie: we shouldn't have multiples of modules or versions, and sort should actually have a value)
       $is_bad = !$hit->{sort}[0] || ref $hit->{fields}{'module.name'} || ref $hit->{fields}{'module.version'};
-   } while ($is_bad and @hits);
+   };
 
    if ($is_bad) {
       if ($try_harder) {
@@ -356,7 +366,7 @@ sub _mcpan_module_minrelease {
    }
 
    my $v = $hit->{'module.version'};
-   return ($hit->{author}.'/'.$fields->{archive}, $v && version->parse($v));
+   return ($hit->{distribution}, $hit->{author}.'/'.$fields->{archive}, $v && version->parse($v));
 }
 
 42;
@@ -365,7 +375,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -373,7 +383,7 @@ Dist::Zilla::Role::TravisYML - Role for .travis.yml creation
 
 =head1 AVAILABILITY
 
-The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
+The project homepage is L<https://github.com/SineSwiper/Dist-Zilla-TravisCI>.
 
 The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
@@ -385,7 +395,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2013 by Brendan Byrd.
+This software is Copyright (c) 2014 by Brendan Byrd.
 
 This is free software, licensed under:
 

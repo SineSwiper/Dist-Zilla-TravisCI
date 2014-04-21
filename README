@@ -102,7 +102,7 @@ TODO
 
 AVAILABILITY
     The project homepage is
-    <https://github.com/SineSwiper/Dist-Zilla-TravisCI/wiki>.
+    <https://github.com/SineSwiper/Dist-Zilla-TravisCI>.
 
     The latest version of this module is available from the Comprehensive
     Perl Archive Network (CPAN). Visit <http://www.perl.com/CPAN/> to find a
@@ -130,12 +130,16 @@ AUTHOR
     Brendan Byrd <bbyrd@cpan.org>
 
 CONTRIBUTORS
+    *   Alex Peters <lxp@cpan.org>
+
     *   Graham Knop <haarg@haarg.org>
+
+    *   Randy Stauner <randy@magnificent-tears.com>
 
     *   Torsten Raudssus <torsten@raudss.us>
 
 COPYRIGHT AND LICENSE
-    This software is Copyright (c) 2013 by Brendan Byrd.
+    This software is Copyright (c) 2014 by Brendan Byrd.
 
     This is free software, licensed under:
 
