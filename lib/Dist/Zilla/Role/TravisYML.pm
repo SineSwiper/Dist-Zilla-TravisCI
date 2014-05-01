@@ -116,7 +116,11 @@ sub build_travis_yml {
 
    my $zilla = $self->zilla;
 
-   my %travis_yml = ( 'language' => 'perl', 'perl' => [ split(/\s+/, $self->perl_version) ] );
+   my %travis_yml = (
+      language => 'perl',
+      perl     => [ split(/\s+/, $self->perl_version) ],
+      matrix   => { fast_finish => 'true' },
+   );
 
    my $email = $self->notify_email->[0];
    my $irc   = $self->notify_irc->[0];
