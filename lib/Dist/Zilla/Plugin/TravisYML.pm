@@ -45,10 +45,17 @@ sub prune_files {
    $self->zilla->prune_file($file) if $file;
 }
 
-# Not much here... most of the magic is in the role
+# Yes, this plugin has nothing to do with installers, but this is the only way to:
+#
+# 1. Make sure things like PruneCruft don't interfere with YAML building.
+# 2. Create the YAML file -after- prereqs have been finalized
+# 3. Do it in a way that doesn't actually add any files into the build dir or tar.gz.
+#
+# See also: https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues/11
+
 sub setup_installer {
    my $self = shift;
-   $self->build_travis_yml;
+   $self->build_travis_yml;  # Not much here... most of the magic is in the role
 }
 
 sub after_release {
