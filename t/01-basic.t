@@ -1,13 +1,14 @@
 use sanity;
-use Test::Most tests => 36;
- 
+use Test::Most tests => 45;
+
 use Test::DZil;
 use YAML;
 use Data::Dumper;
+use List::AllUtils 'pairs';
 
 sub test_travis_yml {
-   my ($opts, $key) = (shift, shift);
-   
+   my $opts = shift;
+
    my $tzil = Builder->from_config(
       { dist_root => 'corpus/dist' },
       { add_files => {
@@ -20,49 +21,50 @@ sub test_travis_yml {
    $tzil->chrome->logger->set_debug(1);
    lives_ok(sub { $tzil->build }, 'built distro') || explain $tzil->log_messages;
 
-   # Serialize options for test name
-   my $d = Data::Dumper->new([$opts], [$key]);
-   my $test_name = $d->Indent(0)->Quotekeys(0)->Pair('=>')->Dump;
-   
    my $yml = YAML::LoadFile($tzil->tempdir->file('source/.travis.yml'));
-   is_deeply($yml->{$key}, @_, $test_name) || always_explain $yml;
+
+   foreach (pairs @_) {
+      my ($key, $value) = @$_;
+
+      # Serialize options for test name
+      my $d = Data::Dumper->new([$opts]);
+      my $test_name = $d->Indent(0)->Quotekeys(0)->Terse(1)->Pair('=>')->Dump;
+      $test_name .= " --> $key";
+
+      is_deeply($yml->{$key}, $value, $test_name) || always_explain $yml;
+   }
 }
 
-# Basic checks 
+# Basic checks
 test_travis_yml(
    {},
-   'script',
-   [ 'dzil smoke --release --author' ],
+   language => 'perl',
+   script   => [ 'dzil smoke --release --author' ],
 );
 
 # Email notification
 test_travis_yml(
    { notify_email => 0 },
-   'notifications',
-   { email => \'false' },
+   notifications => { email => \'false' },
 );
 test_travis_yml(
    { notify_email => 1 },
-   'notifications',
-   undef,
+   notifications => undef,
 );
 test_travis_yml(
    { notify_email => 'foo@bar.com' },
-   'notifications',
-   { email => ['foo@bar.com'] },
+   notifications => { email => ['foo@bar.com'] },
 );
 
 # IRC notification
 # TODO: Test notify_irc=>1 with IRC/x_irc meta resource value
 test_travis_yml(
    { notify_irc => 0 },
-   'notifications',
-   undef,
+   notifications => undef,
 );
 test_travis_yml(
    { notify_irc => 'irc://irc.perl.org/#roomname' },
-   'notifications',
-   { irc => {
+   notifications => { irc => {
       on_failure => 'always',
       on_success => 'change',
       use_notice => 'true',
@@ -72,8 +74,7 @@ test_travis_yml(
 );
 test_travis_yml(
    { notify_irc => 'irc://irc.perl.org/#roomname', irc_template => 'foobar' },
-   'notifications',
-   { irc => {
+   notifications => { irc => {
       on_failure => 'always',
       on_success => 'change',
       use_notice => 'true',
@@ -85,13 +86,35 @@ test_travis_yml(
 # Perl version testing
 test_travis_yml(
    {},
-   'perl',
-   [ qw(5.19 5.18 5.16 5.14 5.12 5.10) ],
+   perl   => [ qw(5.19 5.18 5.16 5.14 5.12 5.10 5.8) ],
+   matrix => {
+      fast_finish    => 'true',
+      allow_failures => [ { perl => '5.8' } ],
+   },
 );
 test_travis_yml(
-   { perl_version => '5.10    5.12'},
-   'perl',
-   [ qw(5.10 5.12) ],
+   { perl_version => '-5.10    5.12' },
+   perl   => [ qw(5.10 5.12) ],
+   matrix => {
+      fast_finish    => 'true',
+      allow_failures => [ { perl => '5.10' } ],
+   },
+);
+test_travis_yml(
+   { perl_version => '5.10' },
+   matrix => { fast_finish => 'true' },
+);
+test_travis_yml(
+   { support_builddir => 1, perl_version_build => '5.8 -5.55' },
+   env    => [ 'BUILD=0', 'BUILD=1' ],
+   perl   => [ qw(5.19 5.18 5.16 5.14 5.12 5.10 5.8 5.55) ],
+   matrix => {
+      fast_finish    => 'true',
+      allow_failures => [
+         { perl => '5.8',  env => 'BUILD=0' },
+         { perl => '5.55', env => 'BUILD=1' },
+      ],
+   },
 );
 
 # Various custom commands
@@ -99,18 +122,15 @@ foreach my $f ('', '_dzil') {  # both should do the same thing
    my $method = 'script'.$f;
    test_travis_yml(
       { $method, 'newcmd' },
-      'script',
-      [ 'newcmd' ],
+      script => [ 'newcmd' ],
    );
    test_travis_yml(
       { 'pre_'.$method, 'newcmd' },
-      'script',
-      [ 'newcmd', 'dzil smoke --release --author' ],
+      script => [ 'newcmd', 'dzil smoke --release --author' ],
    );
    test_travis_yml(
       { 'post_'.$method, 'newcmd' },
-      'script',
-      [ 'dzil smoke --release --author', 'newcmd' ],
+      script => [ 'dzil smoke --release --author', 'newcmd' ],
    );
 }
 foreach my $t ('', 'pre_', 'post_') {
@@ -118,7 +138,6 @@ foreach my $t ('', 'pre_', 'post_') {
    my $method = $t.'script_build';
    test_travis_yml(
       { $method, 'newcmd' },
-      'script',
-      [ 'dzil smoke --release --author' ],
+      script => [ 'dzil smoke --release --author' ],
    );
 }

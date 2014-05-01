@@ -107,8 +107,8 @@ Why two files?  Because chain smoking via DZIL will work a lot differently than 
 {Makefile.PL; make}.  This tests both your distribution repo environment as well as what a
 CPAN user would see.
 
-Of course, you still need to turn on TravisCI and the remote still needs to be a GitHub repo
-for any of this to work.
+Of course, you still need to [turn on Travis CI|http://docs.travis-ci.com/user/getting-started/]
+and the remote still needs to be a GitHub repo for any of this to work.
 
 = OPTIONS
 
@@ -125,6 +125,18 @@ this to match up with the {release_branch} option, if your build branch is not g
 in a {build/*} structure.
 
 Also, if you want to disable build branch testing, you can set this to {0}.
+
+== dzil_branch
+
+Like {build_branch}, this is a regular expression indicating which branches are okay for
+running through Travis CI for DZIL chainsmoking.  The value will be inserted directly as
+an {only} clause on your main DZIL {.travis.yml} file.  The default is not set, so that it is
+ran for all of your branches.
+
+If you want to disable "after release" testing, because, say, you're using [Travis::TestRelease|Dist::Zilla::Plugin::Travis::TestRelease]
+to test things beforehand, you can restrict Travis to only test the release_testing branches:
+
+   dzil_branch = /^release_testing\/.*/
 
 == notify_email
 
@@ -160,16 +172,29 @@ for a list of variables that can be used.
 
 == perl_version
 
-This is a space-delimited option with a list of the perl versions to test against.  The default
-is all supported versions available within Travis, except for Perl 5.8.  This is because there's
-still various DZIL plugins that require 5.10.  (This may change in the future.)
+This is a space-delimited option with a list of the perl versions to test against.  Versions can
+be prepended with a dash to indicate that the version is allowed to fail.
+
+The default is all supported versions available within Travis, except that Perl 5.8 is allowed to
+fail.  This is because there are various DZIL plugins that require 5.10.
 
 You can restrict it down to only a few like this:
 
-   perl_version = 5.10 5.12
+   perl_version = 5.10 5.12 -5.8
 
 Note that any custom settings here will prevent any newer versions from being auto-added (as this
 distro is updated).
+
+== perl_version_build
+
+This is just like {perl_version}, except for build branches.  Both of these options are used in
+dual DZIL+build YAML files as well.  (See the {support_builddir} option for more details.)
+
+The default is whatever {perl_version} is set to.  You may want to force 5.8 to disallow failure:
+
+   perl_version = 5.19 5.18 5.16 5.14 5.12 5.10 5.8
+
+This, of course, requires that your module is compatible with 5.8.
 
 == mvdt
 
@@ -201,6 +226,23 @@ testing for build chainsmoking as well.
 
 The default is {1}.
 
+== support_builddir
+
+Controls whether to build a dual DZIL+build YAML or a standard DZIL YAML.  This is different than a
+build branch YAML, as that is solely used for build tests.
+
+This new config would add a new env variable and double the number of Travis tests.  It is expected
+that a build directory would be found in {.build/testing}.  If it doesn't exist, the build tests
+would essentially be a no-op.
+
+This is used by [Travis::TestRelease|Dist::Zilla::Plugin::Travis::TestRelease]'s release testing
+branches, if its {create_builddir} option is also turned on.  However, if you have some other
+mechanism to dump the build release into that directory (and don't mind a combined DZIL+build master
+branch), this option could be used to test that sort of branch.
+
+Because it can make the config (and Travis tests) kind of messy if you're not using them, the default
+is {0}.
+
 == Custom Commands
 
 For the most part, the default command sets for TravisYML serves its purpose.  However, you may
@@ -216,7 +258,7 @@ They are in the form of:
    $phase    = One of the Travis-CI testing phases (required)
    $filetype = Either '_dzil' or '_build' (optional)
 
-See [Travis-CI's Build Lifecycle|http://about.travis-ci.org/docs/user/build-configuration/#Build-Lifecycle]
+See [Travis-CI's Build Lifecycle|http://docs.travis-ci.com/user/build-lifecycle/]
 for a list of phases.
 
 The positions determine if the commands are to be added at the beginning ({pre_}), the end ({post_}), or
