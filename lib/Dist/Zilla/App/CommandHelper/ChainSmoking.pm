@@ -8,6 +8,8 @@ use Moose;
 
 use List::AllUtils 'first';
 
+use Dist::Zilla::Util::Git::Bundle;
+
 # dzil chainsmoke has to pass this, and we can figure out the rest
 has app => ( isa => 'Object', is => 'ro', required => 1 );
 
@@ -81,7 +83,7 @@ sub chainsmoke {
    # now for the Git commit/push
    $self->git->add('.travis.yml');
    $self->log_debug($_) for $self->git->commit(
-      { message => '"Chain smoking for local branch '.$gb->branch.'"' },
+      { message => 'Chain smoking for local branch '.$gb->branch },
       '--allow-empty',  # because it might be ran multiple times without changes
    );
    $self->log('Committed');
