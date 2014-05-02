@@ -1,6 +1,6 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '1.05'; # VERSION
+our $VERSION = '1.10'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
 use Moose::Role;
@@ -9,7 +9,7 @@ use sanity;
 use MooseX::Has::Sugar;
 use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
-use List::AllUtils qw{ first sum };
+use List::AllUtils qw{ first sum uniq };
 use File::Slurp;
 use YAML qw{ DumpFile };
 
@@ -29,15 +29,19 @@ sub log_fatal { shift->logger->log_fatal(@_) }
 our @phases = qw(
    before_install
    install
+   after_install
    before_script
    script
+   after_script
    after_success
    after_failure
-   after_script
+   after_deploy
 );
 my @yml_order = (qw(
    language
    perl
+   env
+   matrix
    branches
 ), @phases, qw(
    notifications
@@ -51,18 +55,21 @@ has $_ => ( rw, isa => ArrayRef[Str], default => sub { [] } ) for (
    @phases
 );
 
-has build_branch    => ( rw, isa => Str,           default => '/^build\/.*/' );
-has notify_email    => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
-has notify_irc      => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
-has mvdt            => ( rw, isa => Bool,          default => 0              );
-has test_authordeps => ( rw, isa => Bool,          default => 0              );
-has test_deps       => ( rw, isa => Bool,          default => 1              );
+has dzil_branch      => ( rw, isa => Str );
+has build_branch     => ( rw, isa => Str,           default => '/^build\/.*/' );
+has notify_email     => ( rw, isa => ArrayRef[Str], default => sub { [ 1 ] }  );
+has notify_irc       => ( rw, isa => ArrayRef[Str], default => sub { [ 0 ] }  );
+has mvdt             => ( rw, isa => Bool,          default => 0              );
+has test_authordeps  => ( rw, isa => Bool,          default => 0              );
+has test_deps        => ( rw, isa => Bool,          default => 1              );
+has support_builddir => ( rw, isa => Bool,          default => 0              );
 
 has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
 ] } );
 
-has perl_version  => ( rw, isa => Str, default => '5.19 5.18 5.16 5.14 5.12 5.10' );
+has perl_version       => ( rw, isa => Str, default => '5.19 5.18 5.16 5.14 5.12 5.10 -5.8' );
+has perl_version_build => ( rw, isa => Str, lazy, default => sub { shift->perl_version } );
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
    my $self = shift;
@@ -114,15 +121,46 @@ has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
 sub build_travis_yml {
    my ($self, $is_build_branch) = @_;
 
-   my $zilla = $self->zilla;
-
-   my %travis_yml = ( 'language' => 'perl', 'perl' => [ split(/\s+/, $self->perl_version) ] );
+   my %travis_yml = (
+      language => 'perl',
+      matrix   => { fast_finish => 'true' },
+      $self->support_builddir ? (
+         env   => [ 'BUILD=0', 'BUILD=1' ],
+      ) : (),
+   );
 
    my $email = $self->notify_email->[0];
    my $irc   = $self->notify_irc->[0];
    my $rmeta = $self->zilla->distmeta->{resources};
 
    my %notifications;
+
+   # Perl versions
+   my (@perls, @perls_allow_failures);
+   if ($self->support_builddir && !$is_build_branch) {  # dual DZIL+build YAML
+      @perls = uniq map { s/^\-//; $_ } split(/\s+/, $self->perl_version.' '.$self->perl_version_build);
+      @perls_allow_failures = (
+         (
+            map { +{ perl => $_, env => 'BUILD=0' } }
+            grep { s/^\-// }
+            split(/\s+/, $self->perl_version)
+         ), (
+            map { +{ perl => $_, env => 'BUILD=1' } }
+            grep { s/^\-// }
+            split(/\s+/, $self->perl_version_build)
+         )
+      );
+   }
+   else {
+      @perls = split(/\s+/, $is_build_branch ? $self->perl_version : $self->perl_version_build);
+      @perls_allow_failures =
+         map { +{ perl => $_ } }
+         grep { s/^\-// }  # also strips the dash from @perls
+         @perls
+      ;
+   }
+   $travis_yml{perl} = \@perls;
+   $travis_yml{matrix}{allow_failures} = \@perls_allow_failures if @perls_allow_failures;
 
    # IRC
    $irc eq "1" and $irc = $self->notify_irc->[0] = $rmeta->{ first { /irc$/i } keys %$rmeta } || "0";
@@ -143,11 +181,15 @@ sub build_travis_yml {
    $notifications{email} = ($email eq "0") ? \"false" : [ grep { $_ } @{$self->notify_email} ]
       unless ($email eq "1");
 
-   $travis_yml{'notifications'} = \%notifications if (%notifications);
+   $travis_yml{notifications} = \%notifications if %notifications;
 
    my $env_exports = 'export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
 
    ### Prior to the custom mangling by the user, establish a default .travis.yml to work from
+   my %travis_code = (
+      dzil  => {},
+      build => {},
+   );
 
    # needed for MDVT
    my @releases = @{$self->_releases};
@@ -163,66 +205,126 @@ sub build_travis_yml {
       );
    }
 
-   unless ($is_build_branch) {
-      # verbosity/testing and parallelized installs don't mix
-      my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest';
-      my $test_cmd   = 'cpanm --verbose';
+   # DZIL Travis YAML
 
-      $travis_yml{before_install} = [
-         $env_exports,
-         # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
-         'git config --global user.name "TravisCI"',
-         'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
-      ];
-      $travis_yml{install} = scalar(@releases) ? \@releases_install : [
-         "cpanm --quiet --notest --skip-satisfied Dist::Zilla",  # this should already exist anyway...
-         "dzil authordeps --missing | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
-         "dzil listdeps   --missing | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
-      ];
-      $travis_yml{script} = [
-         "dzil smoke --release --author"
-      ];
-   }
-   elsif (my $bbranch = $self->build_branch) {
-      $travis_yml{before_install} = [
-          $env_exports,
-          # Prevent any test problems with this file
-         'rm .travis.yml',
-      ];
-      $travis_yml{install} = scalar(@releases) ? \@releases_install : [
-         'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' .',
-      ];
+   # verbosity/testing and parallelized installs don't mix
+   my $notest_cmd = 'xargs -n 5 -P 10 cpanm --quiet --notest';
+   my $test_cmd   = 'cpanm --verbose';
 
-      $travis_yml{'branches'} = { only => $bbranch };
-   }
-   else {
-      return;  # no point in staying here...
+   $travis_code{dzil}{before_install} = [
+      $env_exports,
+      # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
+      'git config --global user.name "TravisCI"',
+      'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
+   ];
+   $travis_code{dzil}{install} = scalar(@releases) ? \@releases_install : [
+      "cpanm --quiet --notest --skip-satisfied Dist::Zilla",  # this should already exist anyway...
+      "dzil authordeps --missing | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
+      "dzil listdeps   --missing | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
+   ];
+   $travis_code{dzil}{script} = [
+      "dzil smoke --release --author",
+   ];
+
+   # Build Travis YAML
+
+   $travis_code{build}{before_install} = [
+       $env_exports,
+       # Prevent any test problems with this file
+      'rm .travis.yml',
+   ];
+   $travis_code{build}{install} = scalar(@releases) ? \@releases_install : [
+      'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' .',
+   ];
+
+   if (my $bbranch = $self->build_branch) {
+      $travis_code{build}{branches} = { only => $bbranch };
    }
 
    ### See if any custom code is requested
 
-   my $ft_suffix = $is_build_branch ? '_build' : '_dzil';
    foreach my $phase (@phases) {
       # First, replace any new blocks, then deal with pre/post blocks
-      foreach my $ft ('', $ft_suffix) {  # YML file type; specific wins priority
+      foreach my $ft ('', '_dzil', '_build') {  # YML file type; specific wins priority
          my $method = $phase.$ft;
          my $custom_cmds = $self->$method;
-         $travis_yml{$phase} = [ @$custom_cmds ] if ($custom_cmds && @$custom_cmds);
+
+         if ($custom_cmds && @$custom_cmds) {
+            foreach my $key ('dzil', 'build') {
+               next unless (!$ft || substr($ft, 1) eq $key);
+               $travis_code{$key}{$phase} = [ @$custom_cmds ];
+            }
+         }
       }
 
-      foreach my $ft ('', $ft_suffix) {
+      foreach my $ft ('', '_dzil', '_build') {
          foreach my $pos (qw(pre post)) {
             my $method = $pos.'_'.$phase.$ft;
             my $custom_cmds = $self->$method;
 
             if ($custom_cmds && @$custom_cmds) {
-               $pos eq 'pre' ?
-                  unshift(@{$travis_yml{$phase}}, @$custom_cmds) :
-                  push   (@{$travis_yml{$phase}}, @$custom_cmds)
-               ;
+               foreach my $key ('dzil', 'build') {
+                  next unless (!$ft || substr($ft, 1) eq $key);
+                  $travis_code{$key}{$phase} //= [];
+
+                  $pos eq 'pre' ?
+                     unshift(@{$travis_code{$key}{$phase}}, @$custom_cmds) :
+                     push   (@{$travis_code{$key}{$phase}}, @$custom_cmds)
+                  ;
+               }
             }
          }
       }
+   }
+
+   # Insert %travis_code into %travis_yml
+   unless ($is_build_branch) {
+      # Standard DZIL YAML
+      unless ($self->support_builddir) {
+         %travis_yml = (%travis_yml, %{ $travis_code{dzil} });
+      }
+      # Dual DZIL+build YAML
+      else {
+         foreach my $phase (@phases) {  # skip branches as well
+            my @dzil  = $travis_code{dzil} {$phase} ? @{ $travis_code{dzil} {$phase} } : ();
+            my @build = $travis_code{build}{$phase} ? @{ $travis_code{build}{$phase} } : ();
+
+            if ($phase eq 'before_install') {
+               @build = grep { $_ ne 'rm .travis.yml' } @build;  # this won't actually exist in .build/testing
+               unshift @build, 'cd .build/testing';
+            }
+
+            if (@dzil || @build) {
+               $travis_yml{$phase} = [
+                  ( map { 'if [[ $BUILD == 0 ]]; then '.$_.'; fi' } @dzil ),
+                  ( map { 'if [[ $BUILD == 1 ]]; then '.$_.'; fi' } @build ),
+               ];
+            }
+
+            # if the directory doesn't exist, unset $BUILD, so that everything else is a no-op
+            unshift @{ $travis_yml{$phase} }, 'if [[ $BUILD == 1 && ! -d .build/testing ]]; then unset BUILD; fi'
+               if $phase eq 'before_install';
+
+            # because {build}{script} normally doesn't have any lines, mimic the Travis default
+            if ($phase eq 'script' and not @build) {
+               push @{ $travis_yml{$phase} }, (
+                  'if [[ $BUILD == 1 && -f Makefile.PL ]]; then perl Makefile.PL && make test;    fi',
+                  'if [[ $BUILD == 1 && -f Build.PL    ]]; then perl Build.PL    && ./Build test; fi',
+                  'if [[ $BUILD == 1 && ! -f Makefile.PL && ! -f Build.PL ]]; then  make test;    fi',
+               );
+            }
+         }
+      }
+
+      # Add 'only' option, if specified
+      $travis_code{build}{branches} = { only => $self->dzil_branch } if $self->dzil_branch;
+   }
+   # Build branch YAML
+   elsif ($self->build_branch) {
+      %travis_yml = (%travis_yml, %{ $travis_code{build} });
+   }
+   else {
+      return;  # no point in staying here...
    }
 
    ### Dump YML (in order)

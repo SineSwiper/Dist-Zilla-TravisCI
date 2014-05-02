@@ -1,6 +1,6 @@
 package Dist::Zilla::Plugin::TravisYML;
 
-our $VERSION = '1.05'; # VERSION
+our $VERSION = '1.10'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
 use Moose;
@@ -45,10 +45,17 @@ sub prune_files {
    $self->zilla->prune_file($file) if $file;
 }
 
-# Not much here... most of the magic is in the role
+# Yes, this plugin has nothing to do with installers, but this is the only way to:
+#
+# 1. Make sure things like PruneCruft don't interfere with YAML building.
+# 2. Create the YAML file -after- prereqs have been finalized
+# 3. Do it in a way that doesn't actually add any files into the build dir or tar.gz.
+#
+# See also: https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues/11
+
 sub setup_installer {
    my $self = shift;
-   $self->build_travis_yml;
+   $self->build_travis_yml;  # Not much here... most of the magic is in the role
 }
 
 sub after_release {
@@ -113,8 +120,8 @@ Why two files?  Because chain smoking via DZIL will work a lot differently than 
 C<<< Makefile.PL; make >>>.  This tests both your distribution repo environment as well as what a
 CPAN user would see.
 
-Of course, you still need to turn on TravisCI and the remote still needs to be a GitHub repo
-for any of this to work.
+Of course, you still need to L<turn on Travis CI|http://docs.travis-ci.com/user/getting-started/>
+and the remote still needs to be a GitHub repo for any of this to work.
 
 =head1 OPTIONS
 
@@ -131,6 +138,18 @@ this to match up with the C<<< release_branch >>> option, if your build branch i
 in a C<<< build/* >>> structure.
 
 Also, if you want to disable build branch testing, you can set this to C<<< 0 >>>.
+
+=head2 dzil_branch
+
+Like C<<< build_branch >>>, this is a regular expression indicating which branches are okay for
+running through Travis CI for DZIL chainsmoking.  The value will be inserted directly as
+an C<<< only >>> clause on your main DZIL C<<< .travis.yml >>> file.  The default is not set, so that it is
+ran for all of your branches.
+
+If you want to disable "after release" testing, because, say, you're using L<Travis::TestRelease|Dist::Zilla::Plugin::Travis::TestRelease>
+to test things beforehand, you can restrict Travis to only test the release_testing branches:
+
+    dzil_branch = /^release_testing\/.*/
 
 =head2 notify_email
 
@@ -190,16 +209,29 @@ for a list of variables that can be used.
 
 =head2 perl_version
 
-This is a space-delimited option with a list of the perl versions to test against.  The default
-is all supported versions available within Travis, except for Perl 5.8.  This is because there's
-still various DZIL plugins that require 5.10.  (This may change in the future.)
+This is a space-delimited option with a list of the perl versions to test against.  Versions can
+be prepended with a dash to indicate that the version is allowed to fail.
+
+The default is all supported versions available within Travis, except that Perl 5.8 is allowed to
+fail.  This is because there are various DZIL plugins that require 5.10.
 
 You can restrict it down to only a few like this:
 
-    perl_version = 5.10 5.12
+    perl_version = 5.10 5.12 -5.8
 
 Note that any custom settings here will prevent any newer versions from being auto-added (as this
 distro is updated).
+
+=head2 perl_version_build
+
+This is just like C<<< perl_version >>>, except for build branches.  Both of these options are used in
+dual DZIL+build YAML files as well.  (See the C<<< support_builddir >>> option for more details.)
+
+The default is whatever C<<< perl_version >>> is set to.  You may want to force 5.8 to disallow failure:
+
+    perl_version = 5.19 5.18 5.16 5.14 5.12 5.10 5.8
+
+This, of course, requires that your module is compatible with 5.8.
 
 =head2 mvdt
 
@@ -240,6 +272,23 @@ testing for build chainsmoking as well.
 
 The default is C<<< 1 >>>.
 
+=head2 support_builddir
+
+Controls whether to build a dual DZIL+build YAML or a standard DZIL YAML.  This is different than a
+build branch YAML, as that is solely used for build tests.
+
+This new config would add a new env variable and double the number of Travis tests.  It is expected
+that a build directory would be found in C<<< .build/testing >>>.  If it doesn't exist, the build tests
+would essentially be a no-op.
+
+This is used by L<Travis::TestRelease|Dist::Zilla::Plugin::Travis::TestRelease>'s release testing
+branches, if its C<<< create_builddir >>> option is also turned on.  However, if you have some other
+mechanism to dump the build release into that directory (and don't mind a combined DZIL+build master
+branch), this option could be used to test that sort of branch.
+
+Because it can make the config (and Travis tests) kind of messy if you're not using them, the default
+is C<<< 0 >>>.
+
 =head2 Custom Commands
 
 For the most part, the default command sets for TravisYML serves its purpose.  However, you may
@@ -255,7 +304,7 @@ They are in the form of:
     $phase    = One of the Travis-CI testing phases (required)
     $filetype = Either '_dzil' or '_build' (optional)
 
-See L<Travis-CI's Build Lifecycle|http://about.travis-ci.org/docs/user/build-configuration/#Build-Lifecycle>
+See L<Travis-CI's Build Lifecycle|http://docs.travis-ci.com/user/build-lifecycle/>
 for a list of phases.
 
 The positions determine if the commands are to be added at the beginning (C<<< pre_ >>>), the end (C<<< post_ >>>), or

@@ -1,6 +1,6 @@
 package Dist::Zilla::App::Command::chainsmoke;
 
-our $VERSION = '1.05'; # VERSION
+our $VERSION = '1.10'; # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 
 use sanity;
@@ -17,36 +17,37 @@ sub opt_spec {
 }
 
 sub abstract { 'continuously smoke your dist on your CI server' }
- 
+
 sub execute {
    my ($self, $opt) = @_;
    my $cs = Dist::Zilla::App::CommandHelper::ChainSmoking->new( app => $self->app );
-   
+   my $gb = $cs->git_bundle;
+
    # Remote branch option negotating
    if ($opt->remote_branch) {
       my ($remote, $rbranch) = split(qr|/|, $opt->remote_branch, 2);
       die "The --remote_branch option must be in {remote}/{branch} format!"
          unless $rbranch;
-         
-      $cs->_remote_name($remote);
-      $cs->_remote_branch($rbranch);
+
+      $gb->_remote_name($remote);
+      $gb->_remote_branch($rbranch);
    }
-   elsif ($cs->branch =~ /^(?:master|stable)$/) {
-      $cs->_remote_branch('chainsmoking/'.($opt->mvdt ? 'mvdt' : $cs->branch));
+   elsif ($gb->branch =~ /^(?:master|stable)$/) {
+      $gb->_remote_branch('chainsmoking/'.($opt->mvdt ? 'mvdt' : $gb->branch));
    }
 
    # Surgeon General's warning regardless of --remote_branch option
-   if ($cs->branch =~ /^(?:master|stable)$/) {
+   if ($gb->branch =~ /^(?:master|stable)$/) {
       my $confirmed = $self->zilla->chrome->prompt_yn(
-        "Caution: Chain smoking while on branch '".$cs->branch."' may be hazardous to your health.\n".
-        "The remote branch has been set to '".$cs->remote_branch."'.\n".
+        "Caution: Chain smoking while on branch '".$gb->branch."' may be hazardous to your health.\n".
+        "The remote branch has been set to '".$gb->remote_branch."'.\n".
         "Do you want to continue anyway?",
         { default => 0 }
       );
-      
+
       exit unless $confirmed;
    }
-   
+
    $cs->chainsmoke($opt);
 }
 
@@ -82,7 +83,7 @@ for any of this to work.
 
 This enables the L<minimum version dependency testing feature|Dist::Zilla::TravisCI::MVDT>
 from the plugin.  It is HIGHLY recommended that you read up on this feature first, and if this
-is the first time doing these tests on this distro (which the option implies), you should 
+is the first time doing these tests on this distro (which the option implies), you should
 start a new topic branch first, to prevent history pollution on your master/stable branch.
 
 =head2 --silentci

@@ -1,17 +1,20 @@
+use 5.006;
 use strict;
 use warnings;
 
-# this test was generated with Dist::Zilla::Plugin::Test::Compile 2.037
+# this test was generated with Dist::Zilla::Plugin::Test::Compile 2.040
 
-use Test::More  tests => 4 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
+use Test::More  tests => 6 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
 
 
 
 my @module_files = (
     'Dist/Zilla/App/Command/chainsmoke.pm',
     'Dist/Zilla/App/CommandHelper/ChainSmoking.pm',
+    'Dist/Zilla/Plugin/Travis/TestRelease.pm',
     'Dist/Zilla/Plugin/TravisYML.pm',
-    'Dist/Zilla/Role/TravisYML.pm'
+    'Dist/Zilla/Role/TravisYML.pm',
+    'Dist/Zilla/Util/Git/Bundle.pm'
 );
 
 
@@ -24,11 +27,12 @@ use File::Spec;
 use IPC::Open3;
 use IO::Handle;
 
+open my $stdin, '<', File::Spec->devnull or die "can't open devnull: $!";
+
 my @warnings;
 for my $lib (@module_files)
 {
     # see L<perlfaq8/How can I capture STDERR from an external command?>
-    open my $stdin, '<', File::Spec->devnull or die "can't open devnull: $!";
     my $stderr = IO::Handle->new;
 
     my $pid = open3($stdin, '>&STDERR', $stderr, $^X, $inc_switch, '-e', "require q[$lib]");

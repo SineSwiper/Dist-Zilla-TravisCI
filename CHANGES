@@ -1,12 +1,62 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v1.10 2014-05-01
+----------------
+
+[e831cc0]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-05-01 21:21:58 -0400 (2 hours ago)
+
+"Chain smoking for local branch master"
+
+[2b88163]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-05-01 21:19:00 -0400 (2 hours ago)
+
+Fix ChainSmoking.pm
+
+[d21a437]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-05-01 01:12:28 -0400 (23 hours ago)
+
+Write post-failure comment for #11
+
+[a06f0d8]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-04-30 23:19:13 -0400 (24 hours ago)
+
+Many additions/fixes for TravisYML:
+
+* Add support_builddir attr for dual DZIL+build YAMLs
+* Add support for "allowed to fail" Perl versions
+* Re-enable Perl 5.8 as an allowed to fail version
+* Add separate perl_version_build attr (#8)
+* Add dzil_branch attr
+* Add new phases: after_install & after_deploy
+* Turn on Fast Finish
+
+[6a31082]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-04-30 23:15:48 -0400 (25 hours ago)
+
+New plugin: Travis::TestRelease!
+
+Also, move many of the git helpers into Dist::Zilla::Util::Git::Bundle
+
+
 v1.05 2014-04-21
 ----------------
 
+[4f7464e]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-04-21 09:24:59 -0400 (11 days ago)
+
+Release v1.05
+
 [ed5bc58]
 * Author: Randy Stauner <randy@magnificent-tears.com>
-* Date:   2014-04-19 19:32:22 -0700 (35 hours ago)
+* Date:   2014-04-19 19:32:22 -0700 (12 days ago)
 
 Define dump_config for compatibility with newer Git::Repo
 
@@ -29,7 +79,7 @@ fix typo in log message
 
 [ea69e81]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-09-09 22:21:16 -0400 (7 months ago)
+* Date:   2013-09-09 22:21:16 -0400 (8 months ago)
 
 Use two-pass install method for MVDT (#9)
 
@@ -61,7 +111,7 @@ Move around Moose/sanity to (try to) prevent experimental warnings
 
 [be51bb4]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-20 19:39:12 -0400 (10 months ago)
+* Date:   2013-06-20 19:39:12 -0400 (11 months ago)
 
 Add new Perl versions recently added to Travis CI:
    5.19, 5.18, 5.8
@@ -72,7 +122,7 @@ v1.02 2013-06-13
 
 [71ff4b1]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-13 09:26:30 -0400 (10 months ago)
+* Date:   2013-06-13 09:26:30 -0400 (11 months ago)
 
 Remove Dwarn debug from Plugin (no idea how that passed tests...)
 
@@ -105,19 +155,19 @@ v0.98 2013-05-16
 
 [ee602b6]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-05-16 19:05:00 -0400 (11 months ago)
+* Date:   2013-05-16 19:05:00 -0400 (12 months ago)
 
 Release v0.98
 
 [386ec48]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-27 16:29:56 -0400 (12 months ago)
+* Date:   2013-04-27 16:29:56 -0400 (1 year ago)
 
 Remove TODO item about test platform
 
 [806abe2]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-27 16:08:15 -0400 (12 months ago)
+* Date:   2013-04-27 16:08:15 -0400 (1 year ago)
 
 Add documentation of new features
 Change perl_version to space-delimited string
@@ -125,7 +175,7 @@ Add .mailmap for Contributers section
 
 [9c2881c]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-27 09:40:02 -0400 (12 months ago)
+* Date:   2013-04-27 09:40:02 -0400 (1 year ago)
 
 Fix "our @phases" bug
 Remove extra_env (as it is redundant with pre_before_install)
@@ -133,7 +183,7 @@ Add test plan (finally!)
 
 [c3fc2e9]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-26 17:16:18 -0400 (12 months ago)
+* Date:   2013-04-26 17:16:18 -0400 (1 year ago)
 
 Add support for build/dzil block manipulation
 Minor tweaks to YAML
@@ -141,13 +191,13 @@ Add note about build vs. dzil file in log
 
 [85a1051]
 * Author: Graham Knop <haarg@haarg.org>
-* Date:   2013-04-26 10:35:40 -0400 (12 months ago)
+* Date:   2013-04-26 10:35:40 -0400 (1 year ago)
 
 use api for YAML ordering instead of text munging
 
 [6e5d88b]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-25 23:17:10 -0400 (12 months ago)
+* Date:   2013-04-25 23:17:10 -0400 (1 year ago)
 
 Clean up some of the refactoring
 
@@ -158,55 +208,21 @@ test_deps defaults to 1, per original behavior
 
 [c5305b6]
 * Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-26 02:35:54 +0200 (12 months ago)
+* Date:   2013-04-26 02:35:54 +0200 (1 year ago)
 
 Last typos fixed...
 
 [c2db9a2]
 * Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-26 02:12:10 +0200 (12 months ago)
+* Date:   2013-04-26 02:12:10 +0200 (1 year ago)
 
 More tuning and parameters... Making it most quiet and effective by default
 
 [3bc6b46]
 * Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-26 01:35:12 +0200 (12 months ago)
+* Date:   2013-04-26 01:35:12 +0200 (1 year ago)
 
 More or less rewrite.... ;)
-
-
-v0.97 2013-04-22
-----------------
-
-[f0352b1]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-22 22:59:59 -0400 (12 months ago)
-
-Release v0.97
-
-[a931cc1]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-22 22:43:47 -0400 (12 months ago)
-
-Fix up docs a bit (fixes Issue #3)
-
-[6088b1e]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-22 22:11:12 -0400 (12 months ago)
-
-Remove weaver.ini (now in PW BBYRD bundle)
-
-[ea6284f]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-22 15:20:24 -0400 (12 months ago)
-
-Fix email missing "Please tell me who you are" errors
-
-[aad3b6f]
-* Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-21 04:45:34 +0200 (1 year ago)
-
-I don't think it should be really doing AUTHOR and RELEASE testing for the dependencies
 
 
 ===================================
