@@ -8,6 +8,8 @@ use Moose;
 
 use List::AllUtils 'first';
 
+use Dist::Zilla::Util::Git::Bundle;
+
 # dzil chainsmoke has to pass this, and we can figure out the rest
 has app => ( isa => 'Object', is => 'ro', required => 1 );
 
