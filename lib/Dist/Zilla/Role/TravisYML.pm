@@ -219,8 +219,8 @@ sub build_travis_yml {
    ];
    $travis_code{dzil}{install} = scalar(@releases) ? \@releases_install : [
       "cpanm --quiet --notest --skip-satisfied Dist::Zilla",  # this should already exist anyway...
-      "dzil authordeps --missing | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
-      "dzil listdeps   --missing | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
+      "dzil authordeps          --missing | grep -vP '[^\\w:]' | ".($self->test_authordeps ? $test_cmd : $notest_cmd),
+      "dzil listdeps   --author --missing | grep -vP '[^\\w:]' | ".($self->test_deps       ? $test_cmd : $notest_cmd),
    ];
    $travis_code{dzil}{script} = [
       "dzil smoke --release --author",
