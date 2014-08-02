@@ -1,27 +1,55 @@
 language: perl
 perl:
-   - 5.19
-   - 5.18
-   - 5.16
-   - 5.14
-   - 5.12
-   - 5.10
-   - 5.8
+   - 'blead'
+   - '5.20'
+   - '5.18'
+   - '5.16'
+   - '5.14'
+   - '5.12'
+   - '5.10'
+   - '5.8'
+env:
+   - BUILD=0
+   - BUILD=1
 matrix:
    allow_failures:
-      - perl: 5.8
+      - env: BUILD=0
+        perl: 'blead'
+      - env: BUILD=0
+        perl: '5.8'
+      - env: BUILD=1
+        perl: 'blead'
+      - env: BUILD=1
+        perl: '5.8'
    fast_finish: true
 before_install:
-   - export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1
-   - git config --global user.name "TravisCI"
-   - git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"
+   - 'if [[ $BUILD == 1 && ! -d .build/testing ]]; then unset BUILD; fi'
+   - 'if [[ $BUILD == 0 ]]; then export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1; fi'
+   - 'if [[ $BUILD == 0 ]]; then git clone git://github.com/haarg/perl-travis-helper; fi'
+   - 'if [[ $BUILD == 0 ]]; then source perl-travis-helper/init; fi'
+   - 'if [[ $BUILD == 0 ]]; then build-perl; fi'
+   - 'if [[ $BUILD == 0 ]]; then perl -V; fi'
+   - 'if [[ $BUILD == 0 ]]; then git config --global user.name "TravisCI"; fi'
+   - 'if [[ $BUILD == 0 ]]; then git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"; fi'
+   - 'if [[ $BUILD == 1 ]]; then cd .build/testing; fi'
+   - 'if [[ $BUILD == 1 ]]; then export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1; fi'
+   - 'if [[ $BUILD == 1 ]]; then git clone git://github.com/haarg/perl-travis-helper; fi'
+   - 'if [[ $BUILD == 1 ]]; then source perl-travis-helper/init; fi'
+   - 'if [[ $BUILD == 1 ]]; then build-perl; fi'
+   - 'if [[ $BUILD == 1 ]]; then perl -V; fi'
+   - 'if [[ $BUILD == 1 ]]; then cpanm --quiet --notest Cache::FileCache CHI; fi'
 install:
-   - cpanm --quiet --notest --skip-satisfied Dist::Zilla
-   - "dzil authordeps --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest"
-   - "dzil listdeps   --missing | grep -vP '[^\\w:]' | cpanm --verbose"
+   - 'if [[ $BUILD == 0 ]]; then cpanm --quiet --notest --skip-satisfied Dist::Zilla; fi'
+   - "if [[ $BUILD == 0 ]]; then dzil authordeps --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest; fi"
+   - "if [[ $BUILD == 0 ]]; then dzil listdeps   --missing | grep -vP '[^\\w:]' | cpanm --verbose; fi"
+   - 'if [[ $BUILD == 1 ]]; then cpanm --installdeps --verbose  .; fi'
 script:
-   - dzil smoke --release --author
+   - 'if [[ $BUILD == 0 ]]; then dzil smoke --release --author; fi'
+   - 'if [[ $BUILD == 1 && -f Makefile.PL ]]; then perl Makefile.PL && make test;    fi'
+   - 'if [[ $BUILD == 1 && -f Build.PL    ]]; then perl Build.PL    && ./Build test; fi'
+   - 'if [[ $BUILD == 1 && ! -f Makefile.PL && ! -f Build.PL ]]; then  make test;    fi'
 notifications:
+   email: false
    irc:
       channels:
          - irc.perl.org#sanity

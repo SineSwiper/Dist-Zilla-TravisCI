@@ -39,7 +39,7 @@ around mvp_multivalue_args => sub {
 };
 
 sub prune_files {
-   my ($self, $opt) = @_;
+   my ($self) = @_;
    my $file = first { $_->name eq '.travis.yml' } @{$self->zilla->files};
 
    ### !!! NINJA !!! ###
@@ -183,12 +183,18 @@ for a list of variables that can be used.
 This is a space-delimited option with a list of the perl versions to test against.  Versions can
 be prepended with a dash to indicate that the version is allowed to fail.
 
-The default is all supported versions available within Travis, except that Perl 5.8 is allowed to
-fail.  This is because there are various DZIL plugins that require 5.10.
+The default is all of the major stable releases of Perl from 5.8 on up, including the
+bleeding edge of Perl (called 'blead').  This works even if Travis doesn't actually carry
+that version, thanks to Haarg's [Perl Travis Helper tools|http://github.com/haarg/perl-travis-helper],
+used by this module to auto-install the right version of Perl via [Perlbrew|http://perlbrew.pl/].
+
+Versions 5.8 and 'blead' are marked as "allowed to fail" versions.  The former is because
+there are various DZIL plugins that require 5.10.  The latter because, well, it's bleeding
+edge, and the tests may be failing because it's Perl's fault.
 
 You can restrict it down to only a few like this:
 
-   perl_version = 5.10 5.12 -5.8
+   perl_version = 5.10 5.12 5.14.3 -5.8
 
 Note that any custom settings here will prevent any newer versions from being auto-added (as this
 distro is updated).
@@ -200,7 +206,7 @@ dual DZIL+build YAML files as well.  (See the {support_builddir} option for more
 
 The default is whatever {perl_version} is set to.  You may want to force 5.8 to disallow failure:
 
-   perl_version = 5.19 5.18 5.16 5.14 5.12 5.10 5.8
+   perl_version_build = 5.20 5.18 5.16 5.14 5.12 5.10 5.8
 
 This, of course, requires that your module is compatible with 5.8.
 
