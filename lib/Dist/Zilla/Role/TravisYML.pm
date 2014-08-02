@@ -239,6 +239,8 @@ sub build_travis_yml {
       @common_before_install,
       # Prevent any test problems with this file
       'rm .travis.yml',
+      # Build tests shouldn't be considered "author testing"
+      'export AUTHOR_TESTING=0',
    ];
    $travis_code{build}{install} = scalar(@releases) ? \@releases_install : [
       'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' .',
