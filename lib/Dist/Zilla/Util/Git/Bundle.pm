@@ -167,7 +167,7 @@ sub dirty_branch_push {
    my ($self, %params) = @_;
 
    my $create_builddir = $params{create_builddir} || 0;
-   my $stash_reason    = $params{stash_reason} || 'Travis testing';
+   my $commit_reason   = $params{commit_reason} || 'Travis testing';
    my $tgz             = $params{tgz} || Path::Class::file( $self->zilla->name.'-'.$self->zilla->version.'.tar.gz' );
    my $pre_remote_code = $params{pre_remote_code};
 
@@ -203,7 +203,7 @@ sub dirty_branch_push {
          # save everything, including untracked and ignored files
          include_untracked => 1,
          all               => 1,
-      }, "Stash of changed/untracked files for $stash_reason");
+      }, "Stash of changed/untracked files for $commit_reason");
    }
 
    # Entering a try/catch, so that we can back out any git changes before we die
@@ -248,7 +248,7 @@ sub dirty_branch_push {
       $self->log_debug($_) for $git->commit({
          all         => 1,
          allow_empty => 1,  # because it might be ran multiple times without changes
-         message     => "Travis release testing for local branch $current_branch",
+         message     => ucfirst($commit_reason)." for local branch $current_branch",
       });
 
       # final check

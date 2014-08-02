@@ -41,8 +41,8 @@ before_install:
    - 'if [[ $BUILD == 1 ]]; then cpanm --quiet --notest --skip-satisfied autovivification indirect multidimensional; fi'
 install:
    - 'if [[ $BUILD == 0 ]]; then cpanm --quiet --notest --skip-satisfied Dist::Zilla; fi'
-   - "if [[ $BUILD == 0 ]]; then dzil authordeps --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest; fi"
-   - "if [[ $BUILD == 0 ]]; then dzil listdeps   --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest; fi"
+   - "if [[ $BUILD == 0 ]]; then dzil authordeps          --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest; fi"
+   - "if [[ $BUILD == 0 ]]; then dzil listdeps   --author --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest; fi"
    - 'if [[ $BUILD == 1 ]]; then cpanm --installdeps --verbose --notest .; fi'
 script:
    - 'if [[ $BUILD == 0 ]]; then dzil smoke --release --author; fi'

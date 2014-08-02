@@ -113,7 +113,7 @@ sub before_release {
    my $prev_repo_info;
    $gb->dirty_branch_push(
       create_builddir => $self->create_builddir,
-      stash_reason    => 'Travis release testing',
+      commit_reason   => 'Travis release testing',
       tgz             => $tgz,
       pre_remote_code => sub {
          # Check TravisCI prior to the push to make sure the distro works and exists
@@ -128,19 +128,29 @@ sub before_release {
    $self->log('Checking Travis CI for test details...');
 
    # Run through the API polling loop
-   my $repo_info;
+   my $build_summary_info;
    while (1) {
-      $repo_info = $self->travisci_api_get_repo;
+      my $builds_info = $self->travisci_api_get_build;
       $self->_set_time_prefix($start_time);
 
-      if (
-         $repo_info->{last_build_number} >  $prev_repo_info->{last_build_number} ||
-         $repo_info->{last_build_id}     != $prev_repo_info->{last_build_id}
-      ) {
-         my $build_time = str2time($repo_info->{last_build_started_at}, 'GMT');
-         $self->log([ 'Build %u started at %s', $repo_info->{last_build_number}, time2str('%l:%M%p', $build_time) ]);
+      my @potential_builds = grep {
+         $_->{branch} eq $self->remote_branch &&
+         $_->{number} >  $prev_repo_info->{last_build_number} &&
+         $_->{id}     != $prev_repo_info->{last_build_id}
+      } @$builds_info;
 
-         my $url = sprintf 'https://travis-ci.org/%s/builds/%u', $self->slug, $repo_info->{last_build_id};
+      if (@potential_builds) {
+         $build_summary_info = $potential_builds[0];
+
+         if ($build_summary_info->{started_at}) {
+            my $build_time = str2time($build_summary_info->{started_at}, 'GMT');
+            $self->log([ 'Build %u started at %s', $build_summary_info->{number}, time2str('%l:%M%p', $build_time) ]);
+         }
+         else {
+            $self->log([ 'Build %u detected, but not started yet', $build_summary_info->{number} ]);
+         }
+
+         my $url = sprintf 'https://travis-ci.org/%s/builds/%u', $self->slug, $build_summary_info->{id};
          $self->log("Status URL: $url");
 
          # Open it up in a browser
@@ -163,16 +173,39 @@ sub before_release {
       str2time($prev_repo_info->{last_build_finished_at}, 'GMT') -
       str2time($prev_repo_info->{last_build_started_at},  'GMT')
    ;
+   $last_test_duration = 5*60 if $last_test_duration <= 0;
+
    my $poll_freq = int($last_test_duration / 4);
    $poll_freq = 10  if $poll_freq < 10;
    $poll_freq = 120 if $poll_freq > 120;
+
+   my $build_id = $build_summary_info->{id};
 
    # Another polling loop with the build status
    my $prev_build_info;
    $start_time = time;
    while (1) {
-      my $build_info = $self->travisci_api_get_build($repo_info->{last_build_id});
+      my $build_info = $self->travisci_api_get_build($build_id);
       $self->_set_time_prefix($start_time);
+
+      # make sure the job actually started
+      unless ($build_info->{started_at}) {
+         $self->log('   Waiting to start...');
+         sleep $poll_freq * 2;
+         $self->log_fatal("Waited over an hour and the build still hasn't started yet!") if (time - $start_time > 60*60);
+         next;
+      }
+      elsif (!$build_summary_info->{started_at}) {
+         $self->_set_time_prefix($start_time = time);
+         my $build_time = str2time($build_info->{started_at}, 'GMT');
+         $self->log([ 'Build %u started at %s', $build_summary_info->{number}, time2str('%l:%M%p', $build_time) ]);
+      }
+
+      # transplant the build info into the summary
+      $build_summary_info = {
+         %$build_summary_info,
+         map { $_ => $build_info->{$_} if exists $build_info->{$_} } keys %$build_summary_info
+      };
 
       # aggregiate job details
       my @matrix   = @{ $build_info->{matrix} };
@@ -185,6 +218,8 @@ sub before_release {
       my $passed     = int scalar grep { $RESULT_MAP{ $_->{result} } eq 'Pass' } @finished;
       my $allow_fail = int scalar grep { $RESULT_MAP{ $_->{result} } ne 'Pass' &&  $_->{allow_failure} } @finished;
       my $failed     = int scalar grep { $RESULT_MAP{ $_->{result} } ne 'Pass' && !$_->{allow_failure} } @finished;
+
+      $running = 0 if $running < 0;
 
       my @job_status;
       push @job_status, sprintf('%u jobs pending', $pending) if $pending;
@@ -278,17 +313,74 @@ sub travisci_api_get_repo {
    my $repo_info = $result->content_json;
    $self->log_fatal("Travis CI cannot find your repository; did you forget to configure it?") if $repo_info->{file} eq 'not found';
 
+   # {
+   #   description => "Distro description",
+   #   id => 999999,
+   #   last_build_duration => 3387,
+   #   last_build_finished_at => "2055-05-05T55:55:55Z",
+   #   last_build_id => 55555555,
+   #   last_build_language => undef,
+   #   last_build_number => 55,
+   #   last_build_result => 0,
+   #   last_build_started_at => "2055-05-05T55:55:55Z",
+   #   last_build_status => 0,
+   #   public_key => "-----BEGIN RSA PUBLIC KEY-----\nXXXXXXX\n-----END RSA PUBLIC KEY-----\n",
+   #   slug => "Name/Distro"
+   # }
+
    return $repo_info;
 }
 
 sub travisci_api_get_build {
    my ($self, $build_id) = @_;
 
-   my $result = $self->_travis_ua->get('/repos/'.$self->slug."/builds/$build_id");
+   # This is also used to get a build list (without a $build_id)
+   my $result = $self->_travis_ua->get('/repos/'.$self->slug."/builds".($build_id ? "/$build_id" : ''));
    $self->log_fatal("Travis CI API reported back with: $result") unless $result->content_type eq 'application/json';
 
    my $build_info = $result->content_json;
-   $self->log_fatal("Travis CI cannot find your build?!?") if $build_info->{file} eq 'not found';
+   $self->log_fatal("Travis CI cannot find your build?!?") if (ref $build_info eq 'HASH' && $build_info->{file} eq 'not found');
+
+   # Without $build_id (a list of these):
+   # {
+   #   branch => "release_testing/master",
+   #   commit => "ffffffffffffffffffffffffffffffffffffffff",
+   #   duration => undef,
+   #   event_type => "push",
+   #   finished_at => undef,
+   #   id => 99999999,
+   #   message => "Travis release testing for local branch master",
+   #   number => 99,
+   #   repository_id => 999999,
+   #   result => undef,
+   #   started_at => undef,
+   #   state => "created"
+   # },
+
+   # With $build_id:
+   # {
+   #   author_email => "asd\@asd.com",
+   #   author_name => "First Last",
+   #   branch => "release_testing/master",
+   #   commit => "ffffffffffffffffffffffffffffffffffffffff",
+   #   committed_at => "2055-05-05T55:05:05Z",
+   #   committer_email => "asd\@asd.com",
+   #   committer_name => "First Last",
+   #   compare_url => "https://github.com/Name/Distro/compare/ffffffffffff...ffffffffffff",
+   #   config => {},
+   #   duration => undef,
+   #   event_type => "push",
+   #   finished_at => undef,
+   #   id => 99999999,
+   #   matrix => [],
+   #   message => "Travis release testing for local branch master",
+   #   number => 99,
+   #   repository_id => 999999,
+   #   result => undef,
+   #   started_at => undef,
+   #   state => "created",
+   #   status => undef
+   # }
 
    return $build_info;
 }
