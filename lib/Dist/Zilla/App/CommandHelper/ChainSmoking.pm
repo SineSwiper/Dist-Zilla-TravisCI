@@ -1,6 +1,7 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
-our $VERSION = '1.10'; # VERSION
+our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
+our $VERSION = '1.11'; # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
 use sanity;
@@ -83,7 +84,7 @@ sub chainsmoke {
    # now for the Git commit/push
    $self->git->add('.travis.yml');
    $self->log_debug($_) for $self->git->commit(
-      { message => '"Chain smoking for local branch '.$gb->branch.'"' },
+      { message => 'Chain smoking for local branch '.$gb->branch },
       '--allow-empty',  # because it might be ran multiple times without changes
    );
    $self->log('Committed');

@@ -1,30 +1,75 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
-v1.10 2014-05-01
+v1.11 2014-08-02
 ----------------
 
-[e831cc0]
+[4cac9cf]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-05-01 21:21:58 -0400 (2 hours ago)
+* Date:   2014-08-02 16:49:10 -0400 (65 seconds ago)
 
-"Chain smoking for local branch master"
+Turn off AUTHOR_TESTING for build tests
 
-[2b88163]
+[c7b3c79]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-05-01 21:19:00 -0400 (2 hours ago)
+* Date:   2014-08-02 16:24:37 -0400 (26 minutes ago)
+
+Fix TravisYML to work with latest Perl 5.20 + blead
+
+Also:
+* Uses perl-travis-helper to auto-install Perl versions
+* Force quotes on Perl version strings in the YAML, so that zeroes
+  are kept.
+
+[d51bf2e]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 16:07:46 -0400 (42 minutes ago)
+
+Move dirty branch pushing code into its own method in ::Git::Bundle
+
+[ca52f04]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-01 21:16:01 -0400 (20 hours ago)
+
+Add AUTHORITY comment to modules
+
+[efd5dc6]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-01 21:11:43 -0400 (20 hours ago)
+
+Add version dep to List::AllUtils (for 'pairs')
+
+[f667506]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-01 21:11:04 -0400 (20 hours ago)
+
+Add open_status_url option to Travis::TestRelease
+
+
+v1.10 2014-05-02
+----------------
+
+[21696d0]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-05-02 00:18:45 -0400 (3 months ago)
+
+Release v1.10
+
+[048ca76]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-05-01 21:19:00 -0400 (3 months ago)
 
 Fix ChainSmoking.pm
 
 [d21a437]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-05-01 01:12:28 -0400 (23 hours ago)
+* Date:   2014-05-01 01:12:28 -0400 (3 months ago)
 
 Write post-failure comment for #11
 
 [a06f0d8]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-04-30 23:19:13 -0400 (24 hours ago)
+* Date:   2014-04-30 23:19:13 -0400 (3 months ago)
 
 Many additions/fixes for TravisYML:
 
@@ -38,7 +83,7 @@ Many additions/fixes for TravisYML:
 
 [6a31082]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-04-30 23:15:48 -0400 (25 hours ago)
+* Date:   2014-04-30 23:15:48 -0400 (3 months ago)
 
 New plugin: Travis::TestRelease!
 
@@ -50,13 +95,13 @@ v1.05 2014-04-21
 
 [4f7464e]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-04-21 09:24:59 -0400 (11 days ago)
+* Date:   2014-04-21 09:24:59 -0400 (3 months ago)
 
 Release v1.05
 
 [ed5bc58]
 * Author: Randy Stauner <randy@magnificent-tears.com>
-* Date:   2014-04-19 19:32:22 -0700 (12 days ago)
+* Date:   2014-04-19 19:32:22 -0700 (4 months ago)
 
 Define dump_config for compatibility with newer Git::Repo
 
@@ -67,162 +112,21 @@ closes gh-16.
 
 [d6d26b0]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-01-28 23:57:53 -0500 (3 months ago)
+* Date:   2014-01-28 23:57:53 -0500 (6 months ago)
 
 Remove --skip-satisfied in favor of listdeps --missing (#14)
 
 [f9dd5c9]
 * Author: Alex Peters <lxp@cpan.org>
-* Date:   2013-11-23 01:59:47 +1100 (5 months ago)
+* Date:   2013-11-23 01:59:47 +1100 (8 months ago)
 
 fix typo in log message
 
 [ea69e81]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-09-09 22:21:16 -0400 (8 months ago)
+* Date:   2013-09-09 22:21:16 -0400 (11 months ago)
 
 Use two-pass install method for MVDT (#9)
-
-
-v1.04 2013-06-25
-----------------
-
-[f5dc49d]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-25 20:01:17 -0400 (10 months ago)
-
-Remove Perl 5.8 support (for now)
-
-
-v1.03 2013-06-22
-----------------
-
-[2793e3c]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-22 22:35:24 -0400 (10 months ago)
-
-Release v1.03
-
-[a425263]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-21 22:57:15 -0400 (10 months ago)
-
-Move around Moose/sanity to (try to) prevent experimental warnings
-
-[be51bb4]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-20 19:39:12 -0400 (11 months ago)
-
-Add new Perl versions recently added to Travis CI:
-   5.19, 5.18, 5.8
-
-
-v1.02 2013-06-13
-----------------
-
-[71ff4b1]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-13 09:26:30 -0400 (11 months ago)
-
-Remove Dwarn debug from Plugin (no idea how that passed tests...)
-
-
-v1.01 2013-06-07
-----------------
-
-[a4b55fe]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-07 20:47:17 -0400 (11 months ago)
-
-Fix fatal bug with build branch
-
-[346dc50]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-07 20:39:39 -0400 (11 months ago)
-
-Fix docs
-
-[8bb8bce]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-06-07 07:50:46 -0400 (11 months ago)
-
-Fix problem with build-branch .travis.yml not getting properly
-   added if only release_branch is turned on in Git::CommitBuild
-
-
-v0.98 2013-05-16
-----------------
-
-[ee602b6]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-05-16 19:05:00 -0400 (12 months ago)
-
-Release v0.98
-
-[386ec48]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-27 16:29:56 -0400 (1 year ago)
-
-Remove TODO item about test platform
-
-[806abe2]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-27 16:08:15 -0400 (1 year ago)
-
-Add documentation of new features
-Change perl_version to space-delimited string
-Add .mailmap for Contributers section
-
-[9c2881c]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-27 09:40:02 -0400 (1 year ago)
-
-Fix "our @phases" bug
-Remove extra_env (as it is redundant with pre_before_install)
-Add test plan (finally!)
-
-[c3fc2e9]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-26 17:16:18 -0400 (1 year ago)
-
-Add support for build/dzil block manipulation
-Minor tweaks to YAML
-Add note about build vs. dzil file in log
-
-[85a1051]
-* Author: Graham Knop <haarg@haarg.org>
-* Date:   2013-04-26 10:35:40 -0400 (1 year ago)
-
-use api for YAML ordering instead of text munging
-
-[6e5d88b]
-* Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2013-04-25 23:17:10 -0400 (1 year ago)
-
-Clean up some of the refactoring
-
-Added pre/post/$_ logic, for maximum control of added commands
-Added phase ordering to keep some command sanity on larger YML files
-Removed verbose param, since verbosity/testing/parallelization are linked
-test_deps defaults to 1, per original behavior
-
-[c5305b6]
-* Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-26 02:35:54 +0200 (1 year ago)
-
-Last typos fixed...
-
-[c2db9a2]
-* Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-26 02:12:10 +0200 (1 year ago)
-
-More tuning and parameters... Making it most quiet and effective by default
-
-[3bc6b46]
-* Author: Torsten Raudssus <torsten@raudss.us>
-* Date:   2013-04-26 01:35:12 +0200 (1 year ago)
-
-More or less rewrite.... ;)
 
 
 ===================================

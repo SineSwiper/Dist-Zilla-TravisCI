@@ -1,6 +1,7 @@
 package Dist::Zilla::Role::TravisYML;
 
-our $VERSION = '1.10'; # VERSION
+our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
+our $VERSION = '1.11'; # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
 use Moose::Role;
@@ -11,7 +12,7 @@ use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
 use List::AllUtils qw{ first sum uniq };
 use File::Slurp;
-use YAML qw{ DumpFile };
+use YAML qw{ Dump };
 
 use Module::CoreList;
 use version 0.77;
@@ -68,7 +69,7 @@ has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
 ] } );
 
-has perl_version       => ( rw, isa => Str, default => '5.19 5.18 5.16 5.14 5.12 5.10 -5.8' );
+has perl_version       => ( rw, isa => Str, default => '-blead 5.20 5.18 5.16 5.14 5.12 5.10 -5.8' );
 has perl_version_build => ( rw, isa => Str, lazy, default => sub { shift->perl_version } );
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
@@ -178,12 +179,18 @@ sub build_travis_yml {
    }
 
    # Email
-   $notifications{email} = ($email eq "0") ? \"false" : [ grep { $_ } @{$self->notify_email} ]
+   $notifications{email} = ($email eq "0") ? "false" : [ grep { $_ } @{$self->notify_email} ]
       unless ($email eq "1");
 
    $travis_yml{notifications} = \%notifications if %notifications;
 
-   my $env_exports = 'export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1';
+   my @common_before_install = (
+      'export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1',
+      'git clone git://github.com/haarg/perl-travis-helper',
+      'source perl-travis-helper/init',
+      'build-perl',
+      'perl -V',
+   );
 
    ### Prior to the custom mangling by the user, establish a default .travis.yml to work from
    my %travis_code = (
@@ -212,7 +219,7 @@ sub build_travis_yml {
    my $test_cmd   = 'cpanm --verbose';
 
    $travis_code{dzil}{before_install} = [
-      $env_exports,
+      @common_before_install,
       # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
       'git config --global user.name "TravisCI"',
       'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
@@ -229,9 +236,11 @@ sub build_travis_yml {
    # Build Travis YAML
 
    $travis_code{build}{before_install} = [
-       $env_exports,
-       # Prevent any test problems with this file
+      @common_before_install,
+      # Prevent any test problems with this file
       'rm .travis.yml',
+      # Build tests shouldn't be considered "author testing"
+      'export AUTHOR_TESTING=0',
    ];
    $travis_code{build}{install} = scalar(@releases) ? \@releases_install : [
       'cpanm --installdeps --verbose '.($self->test_deps ? '' : '--notest').' .',
@@ -335,8 +344,13 @@ sub build_travis_yml {
    $node->keys([grep { exists $travis_yml{$_} } @yml_order]);
    $self->log( "Rebuilding .travis.yml".($is_build_branch ? ' (in build dir)' : '') );
 
+   # Add quotes to perl version strings, as Travis tends to remove the zeroes
+   my $travis_yml = Dump \%travis_yml;
+   $travis_yml =~ s/^(\s+- )(5\.\d+|blead)$/$1'$2'/gm;
+   $travis_yml =~ s/^(\s+(?:- )?perl: )(5\.\d+|blead)$/$1'$2'/gm;
+
    my $file = Path::Class::File->new($self->zilla->built_in, '.travis.yml');
-   DumpFile($file->stringify, \%travis_yml);
+   $file->spew($travis_yml);
    return $file;
 }
 

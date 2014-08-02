@@ -4,7 +4,7 @@ use Test::Most tests => 45;
 use Test::DZil;
 use YAML;
 use Data::Dumper;
-use List::AllUtils 'pairs';
+use List::AllUtils v0.04 qw(pairs);
 
 sub test_travis_yml {
    my $opts = shift;
@@ -45,7 +45,7 @@ test_travis_yml(
 # Email notification
 test_travis_yml(
    { notify_email => 0 },
-   notifications => { email => \'false' },
+   notifications => { email => 'false' },
 );
 test_travis_yml(
    { notify_email => 1 },
@@ -86,10 +86,10 @@ test_travis_yml(
 # Perl version testing
 test_travis_yml(
    {},
-   perl   => [ qw(5.19 5.18 5.16 5.14 5.12 5.10 5.8) ],
+   perl   => [ qw(blead 5.20 5.18 5.16 5.14 5.12 5.10 5.8) ],
    matrix => {
       fast_finish    => 'true',
-      allow_failures => [ { perl => '5.8' } ],
+      allow_failures => [ { perl => 'blead' }, { perl => '5.8' } ],
    },
 );
 test_travis_yml(
@@ -107,12 +107,13 @@ test_travis_yml(
 test_travis_yml(
    { support_builddir => 1, perl_version_build => '5.8 -5.55' },
    env    => [ 'BUILD=0', 'BUILD=1' ],
-   perl   => [ qw(5.19 5.18 5.16 5.14 5.12 5.10 5.8 5.55) ],
+   perl   => [ qw(blead 5.20 5.18 5.16 5.14 5.12 5.10 5.8 5.55) ],
    matrix => {
       fast_finish    => 'true',
       allow_failures => [
-         { perl => '5.8',  env => 'BUILD=0' },
-         { perl => '5.55', env => 'BUILD=1' },
+         { perl => 'blead', env => 'BUILD=0' },
+         { perl => '5.8',   env => 'BUILD=0' },
+         { perl => '5.55',  env => 'BUILD=1' },
       ],
    },
 );

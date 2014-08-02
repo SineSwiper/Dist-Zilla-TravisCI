@@ -1,6 +1,7 @@
 package Dist::Zilla::Plugin::Travis::TestRelease;
 
-our $VERSION = '1.10'; # VERSION
+our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
+our $VERSION = '1.11'; # VERSION
 # ABSTRACT: makes sure repo passes Travis tests before release
 
 #############################################################################
@@ -9,14 +10,10 @@ our $VERSION = '1.10'; # VERSION
 use Moose;
 use sanity;
 
-use Try::Tiny;
-use List::AllUtils qw( first sum );
 use Net::Travis::API::UA;
 use Date::Parse 'str2time';
 use Date::Format 'time2str';
 use Storable 'dclone';
-use File::pushd ();
-use File::Copy ();
 
 use Dist::Zilla::Util::Git::Bundle;
 
@@ -36,6 +33,7 @@ has _git_bundle => (
       Dist::Zilla::Util::Git::Bundle->new(
          ### XXX: deep recursion on the branches
          zilla         => $self->zilla,
+         logger        => $self->logger,
          #branch        => $self->branch,
          remote_name   => $self->remote,
          #remote_branch => $self->remote_branch,
@@ -49,6 +47,7 @@ has _travis_ua => (
    init_arg => undef,
    default  => sub {
       my $ua = Net::Travis::API::UA->new;
+      no strict 'vars';
       $ua->agent(__PACKAGE__."/$VERSION ");  # prepend our own UA string
       return $ua;
    }
@@ -87,6 +86,11 @@ has create_builddir => (
    isa     => 'Bool',
    default => 0,
 );
+has open_status_url => (
+   is      => 'ro',
+   isa     => 'Bool',
+   default => 0,
+);
 
 #############################################################################
 # Methods
@@ -101,141 +105,22 @@ sub before_release {
    my ($self, $tgz) = @_;
 
    my $gb   = $self->_git_bundle;
-   my $git  = $self->_git;
 
    $gb->branch($self->branch);
    $gb->_remote_branch($self->remote_branch);
 
-   # FETCH ALL THE BRANCHES!!!
-   my @local_branches = $git->branch;
-   my $current_branch = $gb->current_branch;
-   my $testing_branch = $self->branch;
-
-   $self->log_fatal('Must be in a branch!') unless $current_branch;
-   $self->log_fatal('Must not be in the testing branch!') if ($current_branch eq $testing_branch);
-
-   my $slug = $self->slug;
-
-   ### Local setup
-
-   ### TODO: Replace all of these log_debugs with an overloaded Git::Wrapper object
-
-   # Get the last refhash, as we'll need it for our "hard stash pop"
-   my ($refhash) = $git->rev_parse({ verify => 1 }, 'HEAD');
-
-   # Stash any leftover files
-   $self->log("Stashing any files and switching to '$testing_branch' branch...");
-   my $has_changed_files = scalar (
-      $git->diff({ cached => 1, name_status => 1 }),
-      $git->ls_files({
-         modified => 1,
-         deleted  => 1,
-         others   => 1,
-      }),
-   );
-   if ($has_changed_files) {
-      $self->log_debug($_) for $git->stash(save => {
-         # save everything, including untracked and ignored files
-         include_untracked => 1,
-         all               => 1,
-      }, "Stash of changed/untracked files for Travis release testing");
-   }
-
-   # Entering a try/catch, so that we can back out any git changes before we die
+   # Stash, checkout, apply, untar, update, push, reset
    my $prev_repo_info;
-   try {
-      # Sync up the release_testing branch with the main branch
-      if ($gb->is_local_branch_new) {
-         $self->log_debug($_) for $git->checkout({ b => 1 }, $testing_branch, $current_branch);
-      }
-      else {
-         $self->log_debug($_) for $git->checkout($testing_branch);
-         $self->log_debug($_) for $git->reset({ hard => 1 }, $current_branch);
-      }
-
-      if ($has_changed_files) {
-         $self->log_debug($_) for $git->stash('apply');
-         $self->log_debug($_) for $git->add({ all => 1 }, '.');
-      }
-
-      # Add in the build directory, if requested
-      if ($self->create_builddir) {
-         my $build_dir = $self->zilla->root->subdir('.build');
-         $build_dir->mkpath unless -d $build_dir;
-
-         $self->log("Extracting $tgz to ".$build_dir->subdir('testing')->stringify);
-
-         require Archive::Tar;
-
-         $tgz = $tgz->absolute;
-         my @files = do {
-            my $wd = File::pushd::pushd($build_dir);
-            Archive::Tar->extract_archive("$tgz");
-            File::Copy::move( $self->zilla->dist_basename, 'testing' );
-         };
-
-         $self->log_fatal([ "Failed to extract archive: %s", Archive::Tar->error ]) unless @files;
-
-         $self->log_debug($_) for $git->add({
-            all   => 1,
-            force => 1,  # this is probably already on the .gitignore list
-         }, $build_dir->relative->stringify);
-      }
-
-      $self->log_debug($_) for $git->commit({
-         all         => 1,
-         allow_empty => 1,  # because it might be ran multiple times without changes
-         message     => "Travis release testing for local branch $current_branch",
-      });
-
-      # final check
-      $gb->check_local;
-      $self->log("Local branch cleanup complete!");
-
-      # Check TravisCI prior to the push to make sure the distro works and exists
-      $self->log('Checking Travis CI...');
-      $prev_repo_info = $self->travisci_api_get_repo;
-
-      ### Remote setup
-
-      # Verify the branch is up to date
-      $git->remote('update', $gb->remote) unless $gb->is_remote_branch_new;
-
-      # Push it to the remote
-      # (force because we are probably overwriting history of release_testing branch)
-      $self->log_debug($_) for $git->push({ force => 1 }, $gb->remote, 'HEAD:'.$testing_branch);
-      $self->log('Pushed to remote repo!');
-
-      $self->log("Switching back to '$current_branch' branch...");
-      $self->log_debug($_) for $git->checkout($current_branch);
-
-      ### XXX: Okay, so "git stash pop" just won't work when the files already exist.  However, we just stashed this thing and we
-      ### know it was copied from the current branch.  A stash is the same as the branch except with a few extra commits.
-
-      ### Let's force the branch to the stash itself, and then walk the index back a few steps.
-
-      if ($has_changed_files) {
-         $self->log_debug($_) for $git->reset({ hard => 1 }, 'stash@{0}');
-         $self->log_debug($_) for $git->reset($refhash);
-         $self->log_debug($_) for $git->stash('drop', 'stash@{0}');
-      }
-   }
-   catch {
-      # make sure nothing is dangling, get back to the old checkout, and reverse the stash
-      my $error = $_;
-
-      $self->log('Caught an error; backing out...');
-      $self->log_debug($_) for $git->reset({ hard => 1 });
-      $self->log_debug($_) for $git->checkout($current_branch);
-      if ($has_changed_files) {
-         $self->log_debug($_) for $git->reset({ hard => 1 }, 'stash@{0}');
-         $self->log_debug($_) for $git->reset($refhash);
-         $self->log_debug($_) for $git->stash('drop', 'stash@{0}');
-      }
-      $self->log('Backout complete!');
-
-      die $error;
-   };
+   $gb->dirty_branch_push(
+      create_builddir => $self->create_builddir,
+      stash_reason    => 'Travis release testing',
+      tgz             => $tgz,
+      pre_remote_code => sub {
+         # Check TravisCI prior to the push to make sure the distro works and exists
+         $self->log('Checking Travis CI...');
+         $prev_repo_info = $self->travisci_api_get_repo;
+      },
+   );
 
    # Start a clock
    my $start_time = time;
@@ -254,7 +139,16 @@ sub before_release {
       ) {
          my $build_time = str2time($repo_info->{last_build_started_at}, 'GMT');
          $self->log([ 'Build %u started at %s', $repo_info->{last_build_number}, time2str('%l:%M%p', $build_time) ]);
-         $self->log([ 'Status URL: https://travis-ci.org/%s/builds/%u', $self->slug, $repo_info->{last_build_id} ]);
+
+         my $url = sprintf 'https://travis-ci.org/%s/builds/%u', $self->slug, $repo_info->{last_build_id};
+         $self->log("Status URL: $url");
+
+         # Open it up in a browser
+         if ($self->open_status_url) {
+            require Browser::Open;
+            Browser::Open::open_browser($url);
+         }
+
          last;
       }
 
@@ -285,7 +179,6 @@ sub before_release {
       my @started  = grep { defined $_->{started_at}  } @matrix;
       my @finished = grep { defined $_->{finished_at} } @matrix;
 
-      my $total_jobs = int @matrix;
       my $pending    = int @matrix  - @started;
       my $running    = int @started - @finished;
       my $finished   = int @finished;
@@ -531,6 +424,12 @@ directory in the testing branch to be used for build testing.  Whether this is a
 For example, L<TravisYML|Dist::Zilla::Plugin::TravisYML>'s C<<< support_builddir >>> switch will create a Travis matrix in the YAML file
 to test both DZIL and build directories on the same git branch.  If you're not using that plugin, you should at least implement
 something similar to make use of dual DZIL+build tests.
+
+Default is off.
+
+=head2 open_status_url
+
+Boolean; determines whether to automatically open the Travis CI build status URL to a browser, using L<Browser::Open>.
 
 Default is off.
 
