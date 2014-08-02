@@ -9,6 +9,11 @@ use sanity;
 use Moose;
 
 use List::AllUtils 'first';
+use File::pushd ();
+use File::Copy ();
+use Archive::Tar;
+use Try::Tiny;
+
 use Dist::Zilla::Util::Git::Wrapper;
 
 has zilla => (
@@ -155,6 +160,144 @@ sub url_for_remote {
       return $1 if ($line =~ /^\s*(?:Fetch)?\s*URL:\s*(.*)/);
    }
    return;
+}
+
+# Copies the current branch to a different local branch, and force pushes it to the remote
+sub dirty_branch_push {
+   my ($self, %params) = @_;
+
+   my $create_builddir = $params{create_builddir} || 0;
+   my $stash_reason    = $params{stash_reason} || 'Travis testing';
+   my $tgz             = $params{tgz} || Path::Class::file( $self->zilla->name.'-'.$self->zilla->version.'.tar.gz' );
+   my $pre_remote_code = $params{pre_remote_code};
+
+   my $git = $self->git;
+
+   ### Sanity checks
+
+   my $current_branch = $self->current_branch;
+   my $testing_branch = $self->branch;
+
+   $self->log_fatal('Must be in a branch!') unless $current_branch;
+   $self->log_fatal('Must not be in the testing branch!') if ($current_branch eq $testing_branch);
+
+   ### Local setup
+
+   ### TODO: Replace all of these log_debugs with an overloaded Git::Wrapper object
+
+   # Get the last refhash, as we'll need it for our "hard stash pop"
+   my ($refhash) = $git->rev_parse({ verify => 1 }, 'HEAD');
+
+   # Stash any leftover files
+   $self->log("Stashing any files and switching to '$testing_branch' branch...");
+   my $has_changed_files = scalar (
+      $git->diff({ cached => 1, name_status => 1 }),
+      $git->ls_files({
+         modified => 1,
+         deleted  => 1,
+         others   => 1,
+      }),
+   );
+   if ($has_changed_files) {
+      $self->log_debug($_) for $git->stash(save => {
+         # save everything, including untracked and ignored files
+         include_untracked => 1,
+         all               => 1,
+      }, "Stash of changed/untracked files for $stash_reason");
+   }
+
+   # Entering a try/catch, so that we can back out any git changes before we die
+   try {
+      # Sync up the release_testing branch with the main branch
+      if ($self->is_local_branch_new) {
+         $self->log_debug($_) for $git->checkout({ b => 1 }, $testing_branch, $current_branch);
+      }
+      else {
+         $self->log_debug($_) for $git->checkout($testing_branch);
+         $self->log_debug($_) for $git->reset({ hard => 1 }, $current_branch);
+      }
+
+      if ($has_changed_files) {
+         $self->log_debug($_) for $git->stash('apply');
+         $self->log_debug($_) for $git->add({ all => 1 }, '.');
+      }
+
+      # Add in the build directory, if requested
+      if ($create_builddir && -e $tgz) {
+         my $build_dir = $self->zilla->root->subdir('.build');
+         $build_dir->mkpath unless -d $build_dir;
+
+         $self->log("Extracting $tgz to ".$build_dir->subdir('testing')->stringify);
+
+         $tgz = $tgz->absolute;
+         my @files = do {
+            my $wd = File::pushd::pushd($build_dir);
+            Archive::Tar->extract_archive("$tgz");
+            File::Copy::move( $self->zilla->dist_basename, 'testing' );
+            undef $wd;  # just to satisfy unused-vars.t
+         };
+
+         $self->log_fatal([ "Failed to extract archive: %s", Archive::Tar->error ]) unless @files;
+
+         $self->log_debug($_) for $git->add({
+            all   => 1,
+            force => 1,  # this is probably already on the .gitignore list
+         }, $build_dir->relative->stringify);
+      }
+
+      $self->log_debug($_) for $git->commit({
+         all         => 1,
+         allow_empty => 1,  # because it might be ran multiple times without changes
+         message     => "Travis release testing for local branch $current_branch",
+      });
+
+      # final check
+      $self->check_local;
+      $self->log("Local branch cleanup complete!");
+
+      $pre_remote_code->() if $pre_remote_code;
+
+      ### Remote setup
+
+      # Verify the branch is up to date
+      $git->remote('update', $self->remote) unless $self->is_remote_branch_new;
+
+      # Push it to the remote
+      # (force because we are probably overwriting history of the testing branch)
+      $self->log_debug($_) for $git->push({ force => 1 }, $self->remote, 'HEAD:'.$self->_remote_branch);
+      $self->log('Pushed to remote repo!');
+
+      $self->log("Switching back to '$current_branch' branch...");
+      $self->log_debug($_) for $git->checkout($current_branch);
+
+      ### XXX: Okay, so "git stash pop" just won't work when the files already exist.  However, we just stashed this thing and we
+      ### know it was copied from the current branch.  A stash is the same as the branch except with a few extra commits.
+
+      ### Let's force the branch to the stash itself, and then walk the index back a few steps.
+
+      if ($has_changed_files) {
+         $self->log_debug($_) for $git->reset({ hard => 1 }, 'stash@{0}');
+         $self->log_debug($_) for $git->reset($refhash);
+         $self->log_debug($_) for $git->stash('drop', 'stash@{0}');
+      }
+   }
+   catch {
+      # make sure nothing is dangling, get back to the old checkout, and reverse the stash
+      my $error = $_;
+
+      $self->log('Caught an error; backing out...');
+      $self->log_debug($_) for $git->reset({ hard => 1 });
+      $self->log_debug($_) for $git->checkout($current_branch);
+      if ($has_changed_files) {
+         $self->log_debug($_) for $git->reset({ hard => 1 }, 'stash@{0}');
+         $self->log_debug($_) for $git->reset($refhash);
+         $self->log_debug($_) for $git->stash('drop', 'stash@{0}');
+      }
+      $self->log('Backout complete!');
+
+      die $error;
+   };
+
 }
 
 42;
