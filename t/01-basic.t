@@ -4,7 +4,7 @@ use Test::Most tests => 45;
 use Test::DZil;
 use YAML;
 use Data::Dumper;
-use List::AllUtils 'pairs';
+use List::AllUtils v0.04 qw(pairs);
 
 sub test_travis_yml {
    my $opts = shift;
