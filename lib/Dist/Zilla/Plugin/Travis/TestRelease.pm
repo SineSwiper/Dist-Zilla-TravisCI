@@ -49,6 +49,7 @@ has _travis_ua => (
    init_arg => undef,
    default  => sub {
       my $ua = Net::Travis::API::UA->new;
+      no strict 'vars';
       $ua->agent(__PACKAGE__."/$VERSION ");  # prepend our own UA string
       return $ua;
    }
@@ -83,6 +84,11 @@ has slug => (
    },
 );
 has create_builddir => (
+   is      => 'ro',
+   isa     => 'Bool',
+   default => 0,
+);
+has open_status_url => (
    is      => 'ro',
    isa     => 'Bool',
    default => 0,
@@ -254,7 +260,16 @@ sub before_release {
       ) {
          my $build_time = str2time($repo_info->{last_build_started_at}, 'GMT');
          $self->log([ 'Build %u started at %s', $repo_info->{last_build_number}, time2str('%l:%M%p', $build_time) ]);
-         $self->log([ 'Status URL: https://travis-ci.org/%s/builds/%u', $self->slug, $repo_info->{last_build_id} ]);
+
+         my $url = sprintf 'https://travis-ci.org/%s/builds/%u', $self->slug, $repo_info->{last_build_id};
+         $self->log("Status URL: $url");
+
+         # Open it up in a browser
+         if ($self->open_status_url) {
+            require Browser::Open;
+            Browser::Open::open_browser($url);
+         }
+
          last;
       }
 
@@ -498,6 +513,12 @@ directory in the testing branch to be used for build testing.  Whether this is a
 For example, [TravisYML|Dist::Zilla::Plugin::TravisYML]'s {support_builddir} switch will create a Travis matrix in the YAML file
 to test both DZIL and build directories on the same git branch.  If you're not using that plugin, you should at least implement
 something similar to make use of dual DZIL+build tests.
+
+Default is off.
+
+== open_status_url
+
+Boolean; determines whether to automatically open the Travis CI build status URL to a browser, using [Browser::Open].
 
 Default is off.
 
