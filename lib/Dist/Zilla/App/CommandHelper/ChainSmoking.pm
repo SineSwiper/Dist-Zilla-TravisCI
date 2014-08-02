@@ -1,5 +1,6 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
+# AUTHORITY
 # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 

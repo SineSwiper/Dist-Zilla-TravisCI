@@ -1,5 +1,6 @@
 package Dist::Zilla::Plugin::Travis::TestRelease;
 
+# AUTHORITY
 # VERSION
 # ABSTRACT: makes sure repo passes Travis tests before release
 

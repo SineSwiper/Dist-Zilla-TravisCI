@@ -1,5 +1,6 @@
 package Dist::Zilla::Role::TravisYML;
 
+# AUTHORITY
 # VERSION
 # ABSTRACT: Role for .travis.yml creation
 

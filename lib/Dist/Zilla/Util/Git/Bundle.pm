@@ -1,5 +1,6 @@
 package Dist::Zilla::Util::Git::Bundle;
 
+# AUTHORITY
 # VERSION
 # ABSTRACT: Helper class with misc git methods
 
