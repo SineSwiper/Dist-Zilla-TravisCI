@@ -1,5 +1,6 @@
 package Dist::Zilla::App::Command::chainsmoke;
 
+# AUTHORITY
 # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 

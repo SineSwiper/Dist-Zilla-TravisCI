@@ -1,5 +1,6 @@
 package Dist::Zilla::Plugin::TravisYML;
 
+# AUTHORITY
 # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
