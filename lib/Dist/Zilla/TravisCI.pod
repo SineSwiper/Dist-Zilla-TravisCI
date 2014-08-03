@@ -194,6 +194,10 @@ Randy Stauner <randy@magnificent-tears.com>
 
 Torsten Raudssus <torsten@raudss.us>
 
+=item *
+
+Yasutaka ATARASHI <yakex@cpan.org>
+
 =back
 
 =head1 COPYRIGHT AND LICENSE

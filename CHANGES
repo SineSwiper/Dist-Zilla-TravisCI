@@ -1,18 +1,90 @@
 Revision History for Dist-Zilla-TravisCI
 ========================================
 
+v1.12 2014-08-02
+----------------
+
+[a8871c9]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 19:02:49 -0400 (35 minutes ago)
+
+Detect the proper build in a created state using /builds
+
+This is faster than using /repos/{repo}, since it finds them before
+they started.
+
+[9efa55e]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 17:57:27 -0400 (2 hours ago)
+
+Release v1.11
+
+[5266734]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 16:49:10 -0400 (3 hours ago)
+
+Turn off AUTHOR_TESTING for build tests
+
+[416cf02]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 16:24:37 -0400 (3 hours ago)
+
+Fix TravisYML to work with latest Perl 5.20 + blead
+
+Also:
+* Uses perl-travis-helper to auto-install Perl versions
+* Force quotes on Perl version strings in the YAML, so that zeroes
+  are kept.
+
+[b86ec09]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 16:07:46 -0400 (4 hours ago)
+
+Move dirty branch pushing code into its own method in ::Git::Bundle
+
+[6f4cca3]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-01 21:16:01 -0400 (22 hours ago)
+
+Add AUTHORITY comment to modules
+
+[cfeeebf]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-01 21:11:43 -0400 (22 hours ago)
+
+Add version dep to List::AllUtils (for 'pairs')
+
+[fff517e]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-01 21:11:04 -0400 (22 hours ago)
+
+Add open_status_url option to Travis::TestRelease
+
+[eb62828]
+* Author: Yasutaka ATARASHI <yakex@cpan.org>
+* Date:   2014-05-03 14:10:14 +0900 (3 months ago)
+
+Add --author flag to `dzil listdeps' in .travis.yml.
+
+
 v1.11 2014-08-02
 ----------------
 
+[c547f54]
+* Author: Brendan Byrd <Perl@ResonatorSoft.org>
+* Date:   2014-08-02 17:57:27 -0400 (2 hours ago)
+
+Release v1.11
+
 [4cac9cf]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-08-02 16:49:10 -0400 (65 seconds ago)
+* Date:   2014-08-02 16:49:10 -0400 (3 hours ago)
 
 Turn off AUTHOR_TESTING for build tests
 
 [c7b3c79]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-08-02 16:24:37 -0400 (26 minutes ago)
+* Date:   2014-08-02 16:24:37 -0400 (3 hours ago)
 
 Fix TravisYML to work with latest Perl 5.20 + blead
 
@@ -23,25 +95,25 @@ Also:
 
 [d51bf2e]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-08-02 16:07:46 -0400 (42 minutes ago)
+* Date:   2014-08-02 16:07:46 -0400 (4 hours ago)
 
 Move dirty branch pushing code into its own method in ::Git::Bundle
 
 [ca52f04]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-08-01 21:16:01 -0400 (20 hours ago)
+* Date:   2014-08-01 21:16:01 -0400 (22 hours ago)
 
 Add AUTHORITY comment to modules
 
 [efd5dc6]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-08-01 21:11:43 -0400 (20 hours ago)
+* Date:   2014-08-01 21:11:43 -0400 (22 hours ago)
 
 Add version dep to List::AllUtils (for 'pairs')
 
 [f667506]
 * Author: Brendan Byrd <Perl@ResonatorSoft.org>
-* Date:   2014-08-01 21:11:04 -0400 (20 hours ago)
+* Date:   2014-08-01 21:11:04 -0400 (22 hours ago)
 
 Add open_status_url option to Travis::TestRelease
 

@@ -1,7 +1,7 @@
 package Dist::Zilla::Plugin::TravisYML;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.11'; # VERSION
+our $VERSION = '1.12'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
 use Moose;
