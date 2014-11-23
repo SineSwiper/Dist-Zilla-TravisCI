@@ -7,7 +7,6 @@ package Dist::Zilla::App::Command::chainsmoke;
 use sanity;
 
 use Dist::Zilla::App -command;
-use Dist::Zilla::App::CommandHelper::ChainSmoking;
 
 sub opt_spec {
    return (
@@ -21,6 +20,9 @@ sub abstract { 'continuously smoke your dist on your CI server' }
 
 sub execute {
    my ($self, $opt) = @_;
+
+   require Dist::Zilla::App::CommandHelper::ChainSmoking;
+
    my $cs = Dist::Zilla::App::CommandHelper::ChainSmoking->new( app => $self->app );
    my $gb = $cs->git_bundle;
 
