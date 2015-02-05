@@ -98,13 +98,11 @@ sub prebuild {
    my $self = shift;
    my $zilla = $self->zilla;
 
-   use Moose::Autobox 0.09; # ->flatten
-
-   $_->before_build     for $zilla->plugins_with(-BeforeBuild )->flatten;
-   $_->gather_files     for $zilla->plugins_with(-FileGatherer)->flatten;
-   $_->prune_files      for $zilla->plugins_with(-FilePruner  )->flatten;
-   $_->munge_files      for $zilla->plugins_with(-FileMunger  )->flatten;
-   $_->register_prereqs for $zilla->plugins_with(-PrereqSource)->flatten;
+   $_->before_build     for @{ $zilla->plugins_with(-BeforeBuild ) };
+   $_->gather_files     for @{ $zilla->plugins_with(-FileGatherer) };
+   $_->prune_files      for @{ $zilla->plugins_with(-FilePruner  ) };
+   $_->munge_files      for @{ $zilla->plugins_with(-FileMunger  ) };
+   $_->register_prereqs for @{ $zilla->plugins_with(-PrereqSource) };
 
    $zilla->prereqs->finalize;
 }
