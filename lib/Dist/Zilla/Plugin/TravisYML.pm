@@ -91,6 +91,7 @@ __END__
    notify_email = 1
    notify_irc   = 0
    mvdt         = 0
+   sudo         = 0
 
    ; These options are probably a good idea
    ; if you are going to use a build_branch
@@ -256,6 +257,14 @@ branch), this option could be used to test that sort of branch.
 
 Because it can make the config (and Travis tests) kind of messy if you're not using them, the default
 is {0}.
+
+== sudo
+
+Tells Travis CI to use its faster to start container-based infrastrucure which only works with non-root
+access. If you need root access then set this to {1} and Travis CI will fall back to the tradional
+infrastructure.
+
+The default is {0}.
 
 == Custom Commands
 
