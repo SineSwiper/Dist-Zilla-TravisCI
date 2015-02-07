@@ -201,7 +201,6 @@ sub dirty_branch_push {
    if ($has_changed_files) {
       $self->log_debug($_) for $git->stash(save => {
          # save everything, including untracked and ignored files
-         include_untracked => 1,
          all               => 1,
       }, "Stash of changed/untracked files for $commit_reason");
    }
