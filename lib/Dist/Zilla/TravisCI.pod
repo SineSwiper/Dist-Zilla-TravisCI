@@ -176,6 +176,8 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 CONTRIBUTORS
 
+=for stopwords Alex Peters Graham Knop Kent Fredric Peter Roberts Randy Stauner Torsten Raudssus Yasutaka ATARASHI
+
 =over 4
 
 =item *
@@ -185,6 +187,14 @@ Alex Peters <lxp@cpan.org>
 =item *
 
 Graham Knop <haarg@haarg.org>
+
+=item *
+
+Kent Fredric <kentfredric@gmail.com>
+
+=item *
+
+Peter Roberts <me+dev@peter-r.co.uk>
 
 =item *
 
@@ -202,7 +212,7 @@ Yasutaka ATARASHI <yakex@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2014 by Brendan Byrd.
+This software is Copyright (c) 2015 by Brendan Byrd.
 
 This is free software, licensed under:
 

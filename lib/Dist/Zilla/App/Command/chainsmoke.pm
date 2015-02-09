@@ -1,13 +1,12 @@
 package Dist::Zilla::App::Command::chainsmoke;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.12'; # VERSION
+our $VERSION = '1.13'; # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 
 use sanity;
 
 use Dist::Zilla::App -command;
-use Dist::Zilla::App::CommandHelper::ChainSmoking;
 
 sub opt_spec {
    return (
@@ -21,6 +20,9 @@ sub abstract { 'continuously smoke your dist on your CI server' }
 
 sub execute {
    my ($self, $opt) = @_;
+
+   require Dist::Zilla::App::CommandHelper::ChainSmoking;
+
    my $cs = Dist::Zilla::App::CommandHelper::ChainSmoking->new( app => $self->app );
    my $gb = $cs->git_bundle;
 
@@ -132,7 +134,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2014 by Brendan Byrd.
+This software is Copyright (c) 2015 by Brendan Byrd.
 
 This is free software, licensed under:
 

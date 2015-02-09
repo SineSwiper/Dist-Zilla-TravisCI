@@ -1,7 +1,7 @@
 package Dist::Zilla::Util::Git::Bundle;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.12'; # VERSION
+our $VERSION = '1.13'; # VERSION
 # ABSTRACT: Helper class with misc git methods
 
 use sanity;
@@ -201,7 +201,6 @@ sub dirty_branch_push {
    if ($has_changed_files) {
       $self->log_debug($_) for $git->stash(save => {
          # save everything, including untracked and ignored files
-         include_untracked => 1,
          all               => 1,
       }, "Stash of changed/untracked files for $commit_reason");
    }
@@ -326,7 +325,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2014 by Brendan Byrd.
+This software is Copyright (c) 2015 by Brendan Byrd.
 
 This is free software, licensed under:
 

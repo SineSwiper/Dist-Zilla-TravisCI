@@ -1,7 +1,7 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.12'; # VERSION
+our $VERSION = '1.13'; # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
 use sanity;
@@ -98,13 +98,11 @@ sub prebuild {
    my $self = shift;
    my $zilla = $self->zilla;
 
-   use Moose::Autobox 0.09; # ->flatten
-
-   $_->before_build     for $zilla->plugins_with(-BeforeBuild )->flatten;
-   $_->gather_files     for $zilla->plugins_with(-FileGatherer)->flatten;
-   $_->prune_files      for $zilla->plugins_with(-FilePruner  )->flatten;
-   $_->munge_files      for $zilla->plugins_with(-FileMunger  )->flatten;
-   $_->register_prereqs for $zilla->plugins_with(-PrereqSource)->flatten;
+   $_->before_build     for @{ $zilla->plugins_with(-BeforeBuild ) };
+   $_->gather_files     for @{ $zilla->plugins_with(-FileGatherer) };
+   $_->prune_files      for @{ $zilla->plugins_with(-FilePruner  ) };
+   $_->munge_files      for @{ $zilla->plugins_with(-FileMunger  ) };
+   $_->register_prereqs for @{ $zilla->plugins_with(-PrereqSource) };
 
    $zilla->prereqs->finalize;
 }
@@ -135,7 +133,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2014 by Brendan Byrd.
+This software is Copyright (c) 2015 by Brendan Byrd.
 
 This is free software, licensed under:
 

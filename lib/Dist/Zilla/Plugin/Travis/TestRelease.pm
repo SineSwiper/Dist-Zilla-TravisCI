@@ -1,7 +1,7 @@
 package Dist::Zilla::Plugin::Travis::TestRelease;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.12'; # VERSION
+our $VERSION = '1.13'; # VERSION
 # ABSTRACT: makes sure repo passes Travis tests before release
 
 #############################################################################
@@ -296,7 +296,7 @@ sub before_release {
 
       $self->log_fatal("Waited over an hour and the build still hasn't finished yet!") if (time - $start_time > 60*60);
 
-      $poll_freq = int($poll_freq / 2) if ($finished and not $pending || time - $start_time >= $last_test_duration * 0.75);
+      $poll_freq = int($poll_freq / 2) if ($finished && !$pending || time - $start_time >= $last_test_duration * 0.75);
       $poll_freq = 10 if $poll_freq < 10;
       sleep $poll_freq;
    };
@@ -552,7 +552,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2014 by Brendan Byrd.
+This software is Copyright (c) 2015 by Brendan Byrd.
 
 This is free software, licensed under:
 
