@@ -1,6 +1,13 @@
 Changelog for Dist-Zilla-TravisCI
 
-1.13 2015-02-09T03:58:10
+1.14 2015-03-20T03:37:57
+ - Remove File::Slurp (wasn't even using it now, anyway) (fixes #20)
+   (Brendan Byrd)
+ - Suppport Travis CI containerisation infrastructure (Peter Roberts)
+ - Removed duplicated code generated for .travis.yml (haargs travis perl
+   helpers) (ugexe (Nick Logan))
+
+1.13 2015-02-09T05:31:57
  - Fix precedence bug with poll times in TestRelease (Brendan Byrd)
  - Fix failure to function when untracked files are present (Peter Roberts)
  - Remove dependency on Moose::Autobox (Kent Fredric)

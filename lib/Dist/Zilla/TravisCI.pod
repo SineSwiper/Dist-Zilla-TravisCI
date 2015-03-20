@@ -176,7 +176,7 @@ Brendan Byrd <bbyrd@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alex Peters Graham Knop Kent Fredric Peter Roberts Randy Stauner Torsten Raudssus Yasutaka ATARASHI
+=for stopwords Alex Peters Graham Knop Kent Fredric Peter Roberts Randy Stauner Torsten Raudssus Yasutaka ATARASHI ugexe (Nick Logan)
 
 =over 4
 
@@ -207,6 +207,10 @@ Torsten Raudssus <torsten@raudss.us>
 =item *
 
 Yasutaka ATARASHI <yakex@cpan.org>
+
+=item *
+
+ugexe (Nick Logan) <nlogan@gmail.com>
 
 =back
 

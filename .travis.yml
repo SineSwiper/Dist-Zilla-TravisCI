@@ -1,3 +1,4 @@
+sudo: false
 language: perl
 perl:
    - 'blead'
@@ -19,11 +20,6 @@ matrix:
 branches:
    only: /^build\/.*/
 before_install:
-   - export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1
-   - git clone git://github.com/haarg/perl-travis-helper
-   - source perl-travis-helper/init
-   - build-perl
-   - perl -V
    - rm .travis.yml
    - export AUTHOR_TESTING=0
    - cpanm --quiet --notest --skip-satisfied autovivification indirect multidimensional

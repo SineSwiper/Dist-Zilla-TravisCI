@@ -26,22 +26,22 @@ no_index:
 provides:
   Dist::Zilla::App::Command::chainsmoke:
     file: lib/Dist/Zilla/App/Command/chainsmoke.pm
-    version: 1.13
+    version: 1.14
   Dist::Zilla::App::CommandHelper::ChainSmoking:
     file: lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm
-    version: 1.13
+    version: 1.14
   Dist::Zilla::Plugin::Travis::TestRelease:
     file: lib/Dist/Zilla/Plugin/Travis/TestRelease.pm
-    version: 1.13
+    version: 1.14
   Dist::Zilla::Plugin::TravisYML:
     file: lib/Dist/Zilla/Plugin/TravisYML.pm
-    version: 1.13
+    version: 1.14
   Dist::Zilla::Role::TravisYML:
     file: lib/Dist/Zilla/Role/TravisYML.pm
-    version: 1.13
+    version: 1.14
   Dist::Zilla::Util::Git::Bundle:
     file: lib/Dist/Zilla/Util/Git/Bundle.pm
-    version: 1.13
+    version: 1.14
 requires:
   Browser::Open: 0.01
   Date::Format: 0
@@ -54,7 +54,6 @@ requires:
   Dist::Zilla::Role::Git::Repo: 1.113220
   Dist::Zilla::Role::MetaCPANInterfacer: 0.90
   Dist::Zilla::Util::Git::Wrapper: 0.001000
-  File::Slurp: 9999.14
   File::pushd: 1.001
   List::AllUtils: 0.01
   Moose: 0.34
@@ -69,7 +68,7 @@ resources:
   bugtracker: https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues
   homepage: https://github.com/SineSwiper/Dist-Zilla-TravisCI
   repository: https://github.com/SineSwiper/Dist-Zilla-TravisCI.git
-version: 1.13
+version: 1.14
 x_Dist_Zilla:
   perl:
     version: 5.014002
@@ -492,7 +491,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v1.13
+          tag: v1.14
           tag_format: v%v
           tag_message: v%v
           time_zone: local
@@ -598,3 +597,4 @@ x_contributors:
   - 'Randy Stauner <randy@magnificent-tears.com>'
   - 'Torsten Raudssus <torsten@raudss.us>'
   - 'Yasutaka ATARASHI <yakex@cpan.org>'
+  - 'ugexe (Nick Logan) <nlogan@gmail.com>'

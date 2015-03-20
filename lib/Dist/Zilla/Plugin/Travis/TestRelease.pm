@@ -1,7 +1,7 @@
 package Dist::Zilla::Plugin::Travis::TestRelease;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.13'; # VERSION
+our $VERSION = '1.14'; # VERSION
 # ABSTRACT: makes sure repo passes Travis tests before release
 
 #############################################################################

@@ -1,7 +1,7 @@
 package Dist::Zilla::Util::Git::Bundle;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.13'; # VERSION
+our $VERSION = '1.14'; # VERSION
 # ABSTRACT: Helper class with misc git methods
 
 use sanity;

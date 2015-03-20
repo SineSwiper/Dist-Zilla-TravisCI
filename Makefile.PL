@@ -30,7 +30,6 @@ my %WriteMakefileArgs = (
     "Dist::Zilla::Role::Git::Repo" => "1.113220",
     "Dist::Zilla::Role::MetaCPANInterfacer" => "0.90",
     "Dist::Zilla::Util::Git::Wrapper" => "0.001000",
-    "File::Slurp" => "9999.14",
     "File::pushd" => "1.001",
     "List::AllUtils" => "0.01",
     "Moose" => "0.34",
@@ -49,7 +48,7 @@ my %WriteMakefileArgs = (
     "Test::More" => "0.94",
     "Test::Most" => "0.01"
   },
-  "VERSION" => "1.13",
+  "VERSION" => "1.14",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -68,7 +67,6 @@ my %FallbackPrereqs = (
   "Dist::Zilla::Role::Git::Repo" => "1.113220",
   "Dist::Zilla::Role::MetaCPANInterfacer" => "0.90",
   "Dist::Zilla::Util::Git::Wrapper" => "0.001000",
-  "File::Slurp" => "9999.14",
   "File::pushd" => "1.001",
   "List::AllUtils" => "0.01",
   "Moose" => "0.34",

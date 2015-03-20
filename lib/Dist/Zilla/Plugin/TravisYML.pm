@@ -1,7 +1,7 @@
 package Dist::Zilla::Plugin::TravisYML;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.13'; # VERSION
+our $VERSION = '1.14'; # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
 use Moose;
@@ -97,6 +97,7 @@ Dist::Zilla::Plugin::TravisYML - creates a .travis.yml file for Travis CI
     notify_email = 1
     notify_irc   = 0
     mvdt         = 0
+    sudo         = 0
  
     ; These options are probably a good idea
     ; if you are going to use a build_branch
@@ -295,6 +296,14 @@ branch), this option could be used to test that sort of branch.
 
 Because it can make the config (and Travis tests) kind of messy if you're not using them, the default
 is C<<< 0 >>>.
+
+=head2 sudo
+
+Tells Travis CI to use its faster to start container-based infrastrucure which only works with non-root
+access. If you need root access then set this to C<<< 1 >>> and Travis CI will fall back to the tradional
+infrastructure.
+
+The default is C<<< 0 >>>.
 
 =head2 Custom Commands
 
