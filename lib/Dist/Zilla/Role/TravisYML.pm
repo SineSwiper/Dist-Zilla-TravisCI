@@ -39,6 +39,7 @@ our @phases = qw(
    after_deploy
 );
 my @yml_order = (qw(
+   sudo
    language
    perl
    env
@@ -64,6 +65,7 @@ has mvdt             => ( rw, isa => Bool,          default => 0              );
 has test_authordeps  => ( rw, isa => Bool,          default => 0              );
 has test_deps        => ( rw, isa => Bool,          default => 1              );
 has support_builddir => ( rw, isa => Bool,          default => 0              );
+has sudo             => ( rw, isa => Bool,          default => 0              );
 
 has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
@@ -123,6 +125,7 @@ sub build_travis_yml {
    my ($self, $is_build_branch) = @_;
 
    my %travis_yml = (
+      sudo     => $self->sudo ? 'true' : 'false',
       language => 'perl',
       matrix   => { fast_finish => 'true' },
       $self->support_builddir ? (
