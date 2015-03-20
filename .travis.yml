@@ -1,3 +1,4 @@
+sudo: false
 language: perl
 perl:
    - 'blead'
@@ -24,19 +25,14 @@ matrix:
    fast_finish: true
 before_install:
    - 'if [[ $BUILD == 1 && ! -d .build/testing ]]; then unset BUILD; fi'
-   - 'if [[ $BUILD == 0 ]]; then export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1; fi'
-   - 'if [[ $BUILD == 0 ]]; then git clone git://github.com/haarg/perl-travis-helper; fi'
-   - 'if [[ $BUILD == 0 ]]; then source perl-travis-helper/init; fi'
-   - 'if [[ $BUILD == 0 ]]; then build-perl; fi'
-   - 'if [[ $BUILD == 0 ]]; then perl -V; fi'
+   - export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1
+   - git clone git://github.com/haarg/perl-travis-helper
+   - source perl-travis-helper/init
+   - build-perl
+   - perl -V
    - 'if [[ $BUILD == 0 ]]; then git config --global user.name "TravisCI"; fi'
    - 'if [[ $BUILD == 0 ]]; then git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"; fi'
    - 'if [[ $BUILD == 1 ]]; then cd .build/testing; fi'
-   - 'if [[ $BUILD == 1 ]]; then export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1; fi'
-   - 'if [[ $BUILD == 1 ]]; then git clone git://github.com/haarg/perl-travis-helper; fi'
-   - 'if [[ $BUILD == 1 ]]; then source perl-travis-helper/init; fi'
-   - 'if [[ $BUILD == 1 ]]; then build-perl; fi'
-   - 'if [[ $BUILD == 1 ]]; then perl -V; fi'
    - 'if [[ $BUILD == 1 ]]; then export AUTHOR_TESTING=0; fi'
    - 'if [[ $BUILD == 1 ]]; then cpanm --quiet --notest --skip-satisfied autovivification indirect multidimensional; fi'
 install:
