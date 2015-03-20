@@ -187,16 +187,17 @@ sub build_travis_yml {
 
    $travis_yml{notifications} = \%notifications if %notifications;
 
-   my @common_before_install = (
-      'export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1',
-      'git clone git://github.com/haarg/perl-travis-helper',
-      'source perl-travis-helper/init',
-      'build-perl',
-      'perl -V',
-   );
-
    ### Prior to the custom mangling by the user, establish a default .travis.yml to work from
    my %travis_code = (
+      common => { # run for both dzil *and* build
+         before_install => [ # install haarg's perl travis helpers
+            'export AUTOMATED_TESTING=1 NONINTERACTIVE_TESTING=1 HARNESS_OPTIONS=j10:c HARNESS_TIMER=1',
+            'git clone git://github.com/haarg/perl-travis-helper',
+            'source perl-travis-helper/init',
+            'build-perl',
+            'perl -V',
+         ],
+      },
       dzil  => {},
       build => {},
    );
@@ -222,7 +223,6 @@ sub build_travis_yml {
    my $test_cmd   = 'cpanm --verbose';
 
    $travis_code{dzil}{before_install} = [
-      @common_before_install,
       # Fix for https://github.com/travis-ci/travis-cookbooks/issues/159
       'git config --global user.name "TravisCI"',
       'git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"',
@@ -239,7 +239,6 @@ sub build_travis_yml {
    # Build Travis YAML
 
    $travis_code{build}{before_install} = [
-      @common_before_install,
       # Prevent any test problems with this file
       'rm .travis.yml',
       # Build tests shouldn't be considered "author testing"
@@ -298,16 +297,18 @@ sub build_travis_yml {
       # Dual DZIL+build YAML
       else {
          foreach my $phase (@phases) {  # skip branches as well
-            my @dzil  = $travis_code{dzil} {$phase} ? @{ $travis_code{dzil} {$phase} } : ();
-            my @build = $travis_code{build}{$phase} ? @{ $travis_code{build}{$phase} } : ();
+            my @common  = $travis_code{common}{$phase} ? @{ $travis_code{common} {$phase} } : ();
+            my @dzil    = $travis_code{dzil}  {$phase} ? @{ $travis_code{dzil}   {$phase} } : ();
+            my @build   = $travis_code{build} {$phase} ? @{ $travis_code{build}  {$phase} } : ();
 
             if ($phase eq 'before_install') {
                @build = grep { $_ ne 'rm .travis.yml' } @build;  # this won't actually exist in .build/testing
                unshift @build, 'cd .build/testing';
             }
 
-            if (@dzil || @build) {
+            if (@common || @dzil || @build) {
                $travis_yml{$phase} = [
+                  @common,
                   ( map { 'if [[ $BUILD == 0 ]]; then '.$_.'; fi' } @dzil ),
                   ( map { 'if [[ $BUILD == 1 ]]; then '.$_.'; fi' } @build ),
                ];
