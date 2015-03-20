@@ -11,7 +11,6 @@ use MooseX::Has::Sugar;
 use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };
 
 use List::AllUtils qw{ first sum uniq };
-use File::Slurp;
 use YAML qw{ Dump };
 
 use Module::CoreList;
