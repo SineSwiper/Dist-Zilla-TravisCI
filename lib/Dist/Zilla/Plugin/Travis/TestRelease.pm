@@ -1,14 +1,14 @@
 package Dist::Zilla::Plugin::Travis::TestRelease;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.14'; # VERSION
+our $VERSION = '1.15'; # VERSION
 # ABSTRACT: makes sure repo passes Travis tests before release
 
 #############################################################################
 # Modules
 
+use v5.10;
 use Moose;
-use sanity;
 
 use Net::Travis::API::UA;
 use Date::Parse 'str2time';
@@ -48,6 +48,8 @@ has _travis_ua => (
    default  => sub {
       my $ua = Net::Travis::API::UA->new;
       no strict 'vars';
+      no warnings 'uninitialized';  # $VERSION is undef when bootstrapping
+
       $ua->agent(__PACKAGE__."/$VERSION ");  # prepend our own UA string
       return $ua;
    }
@@ -215,9 +217,9 @@ sub before_release {
       my $pending    = int @matrix  - @started;
       my $running    = int @started - @finished;
       my $finished   = int @finished;
-      my $passed     = int scalar grep { $RESULT_MAP{ $_->{result} } eq 'Pass' } @finished;
-      my $allow_fail = int scalar grep { $RESULT_MAP{ $_->{result} } ne 'Pass' &&  $_->{allow_failure} } @finished;
-      my $failed     = int scalar grep { $RESULT_MAP{ $_->{result} } ne 'Pass' && !$_->{allow_failure} } @finished;
+      my $passed     = int scalar grep { $RESULT_MAP{ $_->{result} // '' } eq 'Pass' } @finished;
+      my $allow_fail = int scalar grep { $RESULT_MAP{ $_->{result} // '' } ne 'Pass' &&  $_->{allow_failure} } @finished;
+      my $failed     = int scalar grep { $RESULT_MAP{ $_->{result} // '' } ne 'Pass' && !$_->{allow_failure} } @finished;
 
       $running = 0 if $running < 0;
 
@@ -266,7 +268,7 @@ sub before_release {
 
          # jobs that have finished
          if    (!defined $prev->{finished_at} && defined $job->{finished_at}) {
-            my $result = $RESULT_MAP{ $job->{result} };
+            my $result = $RESULT_MAP{ $job->{result} // '' };
             $result .= ' (allowed)' if ($result eq 'Fail' && $job->{allow_failure});
 
             my $finish_time = str2time($job->{finished_at}, 'GMT');
@@ -311,7 +313,8 @@ sub travisci_api_get_repo {
    $self->log_fatal("Travis CI API reported back with: $result") unless $result->content_type eq 'application/json';
 
    my $repo_info = $result->content_json;
-   $self->log_fatal("Travis CI cannot find your repository; did you forget to configure it?") if $repo_info->{file} eq 'not found';
+   $self->log_fatal("Travis CI cannot find your repository; did you forget to configure it?")
+      if ($repo_info->{file} && $repo_info->{file} eq 'not found');
 
    # {
    #   description => "Distro description",
@@ -339,7 +342,8 @@ sub travisci_api_get_build {
    $self->log_fatal("Travis CI API reported back with: $result") unless $result->content_type eq 'application/json';
 
    my $build_info = $result->content_json;
-   $self->log_fatal("Travis CI cannot find your build?!?") if (ref $build_info eq 'HASH' && $build_info->{file} eq 'not found');
+   $self->log_fatal("Travis CI cannot find your build?!?")
+      if (ref $build_info eq 'HASH' && $build_info->{file} && $build_info->{file} eq 'not found');
 
    # Without $build_id (a list of these):
    # {

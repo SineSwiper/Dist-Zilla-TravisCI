@@ -1,10 +1,10 @@
 package Dist::Zilla::App::CommandHelper::ChainSmoking;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.14'; # VERSION
+our $VERSION = '1.15'; # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
-use sanity;
+use v5.10;
 use Moose;
 
 use List::AllUtils 'first';

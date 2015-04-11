@@ -87,8 +87,7 @@ do { my $x = {
                                       'Net::Travis::API::UA' => '0.001000',
                                       'Try::Tiny' => '0.01',
                                       'YAML' => '0.67',
-                                      'perl' => 'v5.10.1',
-                                      'sanity' => '0.91'
+                                      'perl' => 'v5.10.1'
                                     }
                     },
        'test' => {
@@ -102,7 +101,8 @@ do { my $x = {
                                    'Test::DZil' => '4.200002',
                                    'Test::More' => '0.94',
                                    'Test::Most' => '0.01',
-                                   'perl' => 'v5.10.1'
+                                   'perl' => 'v5.10.1',
+                                   'sanity' => '0.91'
                                  }
                  }
      };

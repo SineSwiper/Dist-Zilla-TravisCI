@@ -10,6 +10,7 @@ build_requires:
   Test::More: 0.94
   Test::Most: 0.01
   perl: v5.10.1
+  sanity: 0.91
 dynamic_config: 0
 generated_by: 'Dist::Zilla version 5.031, CPAN::Meta::Converter version 2.143240'
 license: artistic_2
@@ -26,22 +27,22 @@ no_index:
 provides:
   Dist::Zilla::App::Command::chainsmoke:
     file: lib/Dist/Zilla/App/Command/chainsmoke.pm
-    version: 1.14
+    version: 1.15
   Dist::Zilla::App::CommandHelper::ChainSmoking:
     file: lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm
-    version: 1.14
+    version: 1.15
   Dist::Zilla::Plugin::Travis::TestRelease:
     file: lib/Dist/Zilla/Plugin/Travis/TestRelease.pm
-    version: 1.14
+    version: 1.15
   Dist::Zilla::Plugin::TravisYML:
     file: lib/Dist/Zilla/Plugin/TravisYML.pm
-    version: 1.14
+    version: 1.15
   Dist::Zilla::Role::TravisYML:
     file: lib/Dist/Zilla/Role/TravisYML.pm
-    version: 1.14
+    version: 1.15
   Dist::Zilla::Util::Git::Bundle:
     file: lib/Dist/Zilla/Util/Git/Bundle.pm
-    version: 1.14
+    version: 1.15
 requires:
   Browser::Open: 0.01
   Date::Format: 0
@@ -63,12 +64,11 @@ requires:
   Try::Tiny: 0.01
   YAML: 0.67
   perl: v5.10.1
-  sanity: 0.91
 resources:
   bugtracker: https://github.com/SineSwiper/Dist-Zilla-TravisCI/issues
   homepage: https://github.com/SineSwiper/Dist-Zilla-TravisCI
   repository: https://github.com/SineSwiper/Dist-Zilla-TravisCI.git
-version: 1.14
+version: 1.15
 x_Dist_Zilla:
   perl:
     version: 5.014002
@@ -491,7 +491,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v1.14
+          tag: v1.15
           tag_format: v%v
           tag_message: v%v
           time_zone: local

@@ -110,8 +110,7 @@
             "Net::Travis::API::UA" : "0.001000",
             "Try::Tiny" : "0.01",
             "YAML" : "0.67",
-            "perl" : "v5.10.1",
-            "sanity" : "0.91"
+            "perl" : "v5.10.1"
          }
       },
       "test" : {
@@ -125,34 +124,35 @@
             "Test::DZil" : "4.200002",
             "Test::More" : "0.94",
             "Test::Most" : "0.01",
-            "perl" : "v5.10.1"
+            "perl" : "v5.10.1",
+            "sanity" : "0.91"
          }
       }
    },
    "provides" : {
       "Dist::Zilla::App::Command::chainsmoke" : {
          "file" : "lib/Dist/Zilla/App/Command/chainsmoke.pm",
-         "version" : "1.14"
+         "version" : "1.15"
       },
       "Dist::Zilla::App::CommandHelper::ChainSmoking" : {
          "file" : "lib/Dist/Zilla/App/CommandHelper/ChainSmoking.pm",
-         "version" : "1.14"
+         "version" : "1.15"
       },
       "Dist::Zilla::Plugin::Travis::TestRelease" : {
          "file" : "lib/Dist/Zilla/Plugin/Travis/TestRelease.pm",
-         "version" : "1.14"
+         "version" : "1.15"
       },
       "Dist::Zilla::Plugin::TravisYML" : {
          "file" : "lib/Dist/Zilla/Plugin/TravisYML.pm",
-         "version" : "1.14"
+         "version" : "1.15"
       },
       "Dist::Zilla::Role::TravisYML" : {
          "file" : "lib/Dist/Zilla/Role/TravisYML.pm",
-         "version" : "1.14"
+         "version" : "1.15"
       },
       "Dist::Zilla::Util::Git::Bundle" : {
          "file" : "lib/Dist/Zilla/Util/Git/Bundle.pm",
-         "version" : "1.14"
+         "version" : "1.15"
       }
    },
    "release_status" : "stable",
@@ -167,7 +167,7 @@
          "web" : "https://github.com/SineSwiper/Dist-Zilla-TravisCI"
       }
    },
-   "version" : "1.14",
+   "version" : "1.15",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.014002"
@@ -715,7 +715,7 @@
                "Dist::Zilla::Plugin::Git::Tag" : {
                   "branch" : null,
                   "signed" : 0,
-                  "tag" : "v1.14",
+                  "tag" : "v1.15",
                   "tag_format" : "v%v",
                   "tag_message" : "v%v",
                   "time_zone" : "local"

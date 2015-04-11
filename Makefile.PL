@@ -37,8 +37,7 @@ my %WriteMakefileArgs = (
     "MooseX::Types::Moose" => 0,
     "Net::Travis::API::UA" => "0.001000",
     "Try::Tiny" => "0.01",
-    "YAML" => "0.67",
-    "sanity" => "0.91"
+    "YAML" => "0.67"
   },
   "TEST_REQUIRES" => {
     "Dist::Zilla" => "1.093220",
@@ -46,9 +45,10 @@ my %WriteMakefileArgs = (
     "Test::CheckDeps" => "0.010",
     "Test::DZil" => "4.200002",
     "Test::More" => "0.94",
-    "Test::Most" => "0.01"
+    "Test::Most" => "0.01",
+    "sanity" => "0.91"
   },
-  "VERSION" => "1.14",
+  "VERSION" => "1.15",
   "test" => {
     "TESTS" => "t/*.t"
   }

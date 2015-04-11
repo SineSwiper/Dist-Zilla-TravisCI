@@ -1,11 +1,10 @@
 package Dist::Zilla::Util::Git::Bundle;
 
 our $AUTHORITY = 'cpan:BBYRD'; # AUTHORITY
-our $VERSION = '1.14'; # VERSION
+our $VERSION = '1.15'; # VERSION
 # ABSTRACT: Helper class with misc git methods
 
-use sanity;
-
+use v5.10;
 use Moose;
 
 use List::AllUtils 'first';

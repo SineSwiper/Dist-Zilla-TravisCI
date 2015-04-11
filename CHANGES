@@ -1,6 +1,10 @@
 Changelog for Dist-Zilla-TravisCI
 
-1.14 2015-03-20T03:37:57
+1.15 2015-04-11T07:13:10
+ - Fix a few uninitialized/experimental warnings (Brendan Byrd)
+ - Remove sanity module (fixes #31) (Brendan Byrd)
+
+1.14 2015-03-20T12:51:27
  - Remove File::Slurp (wasn't even using it now, anyway) (fixes #20)
    (Brendan Byrd)
  - Suppport Travis CI containerisation infrastructure (Peter Roberts)
