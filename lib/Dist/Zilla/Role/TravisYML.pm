@@ -4,8 +4,8 @@ package Dist::Zilla::Role::TravisYML;
 # VERSION
 # ABSTRACT: Role for .travis.yml creation
 
+use v5.10;
 use Moose::Role;
-use sanity;
 
 use MooseX::Has::Sugar;
 use MooseX::Types::Moose qw{ ArrayRef Str Bool is_Bool };

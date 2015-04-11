@@ -4,7 +4,9 @@ package Dist::Zilla::App::Command::chainsmoke;
 # VERSION
 # ABSTRACT: continuously smoke your dist on your CI server
 
-use sanity;
+use v5.10;
+use strict;
+use warnings;
 
 use Dist::Zilla::App -command;
 

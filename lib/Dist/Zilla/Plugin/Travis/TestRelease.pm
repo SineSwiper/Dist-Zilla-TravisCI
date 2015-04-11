@@ -7,8 +7,8 @@ package Dist::Zilla::Plugin::Travis::TestRelease;
 #############################################################################
 # Modules
 
+use v5.10;
 use Moose;
-use sanity;
 
 use Net::Travis::API::UA;
 use Date::Parse 'str2time';

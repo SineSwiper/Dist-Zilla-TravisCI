@@ -4,7 +4,7 @@ package Dist::Zilla::App::CommandHelper::ChainSmoking;
 # VERSION
 # ABSTRACT: Helper class for chainsmoke command
 
-use sanity;
+use v5.10;
 use Moose;
 
 use List::AllUtils 'first';

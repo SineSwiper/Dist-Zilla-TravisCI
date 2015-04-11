@@ -4,8 +4,8 @@ package Dist::Zilla::Plugin::TravisYML;
 # VERSION
 # ABSTRACT: creates a .travis.yml file for Travis CI
 
+use v5.10;
 use Moose;
-use sanity;
 
 use Dist::Zilla::File::InMemory;
 use List::AllUtils 'first';

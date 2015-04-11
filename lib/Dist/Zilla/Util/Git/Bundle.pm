@@ -4,8 +4,7 @@ package Dist::Zilla::Util::Git::Bundle;
 # VERSION
 # ABSTRACT: Helper class with misc git methods
 
-use sanity;
-
+use v5.10;
 use Moose;
 
 use List::AllUtils 'first';
