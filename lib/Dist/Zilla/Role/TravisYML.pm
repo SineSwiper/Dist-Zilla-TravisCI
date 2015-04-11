@@ -381,16 +381,14 @@ sub _as_lucene_query {
       }
       else { $ver = $num_ver; }
 
-      for ($cmp) {
-         when ('==') { return 'module.version'.($use_num ? '_numified' : '').':'.$ver; }  # no need to look at anything else
-         when ('!=') { $use_num ? push(@num_conds, '-'.$ver) : push(@str_conds, '-'.$ver); }
-         ### XXX: Trying to do range-based searches on strings isn't a good idea, so we always use the number field ###
-         when ('>=') { ($min, $is_min_inc) = ($num_ver, 1); }
-         when ('<=') { ($max, $is_max_inc) = ($num_ver, 1); }
-         when ('>')  { ($min, $is_min_inc) = ($num_ver, 0); }
-         when ('<')  { ($max, $is_max_inc) = ($num_ver, 0); }
-         default     { die 'Unable to parse complex module requirements with operator of '.$cmp.' !'; }
-      }
+      if ($cmp eq '==') { return 'module.version'.($use_num ? '_numified' : '').':'.$ver; }  # no need to look at anything else
+      if ($cmp eq '!=') { $use_num ? push(@num_conds, '-'.$ver) : push(@str_conds, '-'.$ver); }
+      ### XXX: Trying to do range-based searches on strings isn't a good idea, so we always use the number field ###
+      if ($cmp eq '>=') { ($min, $is_min_inc) = ($num_ver, 1); }
+      if ($cmp eq '<=') { ($max, $is_max_inc) = ($num_ver, 1); }
+      if ($cmp eq '>')  { ($min, $is_min_inc) = ($num_ver, 0); }
+      if ($cmp eq '<')  { ($max, $is_max_inc) = ($num_ver, 0); }
+      else              { die 'Unable to parse complex module requirements with operator of '.$cmp.' !'; }
    }
 
    # Min/Max parsing
