@@ -86,7 +86,7 @@ test_travis_yml(
 # Perl version testing
 test_travis_yml(
    {},
-   perl   => [ qw(blead 5.20 5.18 5.16 5.14 5.12 5.10 5.8) ],
+   perl   => [ qw(blead 5.22 5.20 5.18 5.16 5.14 5.12 5.10 5.8) ],
    matrix => {
       fast_finish    => 'true',
       allow_failures => [ { perl => 'blead' }, { perl => '5.8' } ],
@@ -107,7 +107,7 @@ test_travis_yml(
 test_travis_yml(
    { support_builddir => 1, perl_version_build => '5.8 -5.55' },
    env    => [ 'BUILD=0', 'BUILD=1' ],
-   perl   => [ qw(blead 5.20 5.18 5.16 5.14 5.12 5.10 5.8 5.55) ],
+   perl   => [ qw(blead 5.22 5.20 5.18 5.16 5.14 5.12 5.10 5.8 5.55) ],
    matrix => {
       fast_finish    => 'true',
       allow_failures => [
