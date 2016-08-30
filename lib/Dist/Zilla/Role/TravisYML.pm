@@ -291,7 +291,15 @@ sub build_travis_yml {
    unless ($is_build_branch) {
       # Standard DZIL YAML
       unless ($self->support_builddir) {
-         %travis_yml = (%travis_yml, %{ $travis_code{dzil} });
+          # Fix for GH issue #34
+          # First merge common before_install
+          push @{$travis_yml{before_install}}, @{$travis_code{common}{before_install}};
+          # Then merge phases for DZIL
+          for (@phases) {
+              my $dzil_arr = $travis_code{dzil}{$_};
+              # Only merge those that exist
+              push @{$travis_yml{$_}}, @$dzil_arr if $dzil_arr;
+          }
       }
       # Dual DZIL+build YAML
       else {
@@ -333,7 +341,15 @@ sub build_travis_yml {
    }
    # Build branch YAML
    elsif ($self->build_branch) {
-      %travis_yml = (%travis_yml, %{ $travis_code{build} });
+      # Fix for GH issue #34
+      # First merge common before_install
+      push @{$travis_yml{before_install}}, @{$travis_code{common}{before_install}};
+      # Then merge phases for build
+      for (@phases) {
+          my $build_arr = $travis_code{build}{$_};
+          # Only merge those that exist
+          push @{$travis_yml{$_}}, @$build_arr if $build_arr;
+      }
    }
    else {
       return;  # no point in staying here...
