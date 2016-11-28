@@ -155,7 +155,7 @@ sub build_travis_yml {
       );
    }
    else {
-      @perls = split(/\s+/, $is_build_branch ? $self->perl_version : $self->perl_version_build);
+      @perls = split(/\s+/, $is_build_branch ? $self->perl_version_build : $self->perl_version);
       @perls_allow_failures =
          map { +{ perl => $_ } }
          grep { s/^\-// }  # also strips the dash from @perls
