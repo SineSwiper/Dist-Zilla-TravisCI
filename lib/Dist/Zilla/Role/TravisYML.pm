@@ -70,7 +70,7 @@ has irc_template  => ( rw, isa => ArrayRef[Str], default => sub { [
    "%{branch}#%{build_number} by %{author}: %{message} (%{build_url})",
 ] } );
 
-has perl_version       => ( rw, isa => Str, default => '-blead 5.24 5.22 5.20 5.18 5.16 5.14 5.12 5.10 -5.8' );
+has perl_version       => ( rw, isa => Str, default => '-blead 5.26 5.24 5.22 5.20 5.18 5.16 5.14 5.12 5.10 -5.8' );
 has perl_version_build => ( rw, isa => Str, lazy, default => sub { shift->perl_version } );
 
 has _releases => ( ro, isa => ArrayRef[Str], lazy, default => sub {
