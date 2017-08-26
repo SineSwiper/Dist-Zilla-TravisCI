@@ -110,6 +110,14 @@ Flip a bit on your distro through the L<profile page|https://travis-ci.org/profi
 
 Put the L<TravisYML|Dist::Zilla::Plugin::TravisYML> plugin in your dist.ini.
 
+=item 4.
+
+Generate .travis.yml using dzil as usual and eventually running C<dzil build>
+
+=item 5.
+
+Add C<.travis.yml> to your repo C<git add .travis.yml>. You can push now to get the tests run on your repo.
+
 =back
 
 There's some extra configuration you can do: build branches, MVDT, etc.  But, that's the basic setup.
